@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:ecomed/ApiCalls/ApiCalls.dart';
-import 'package:ecomed/EmployeeLeave/LeaveBalances.dart';
-import 'package:ecomed/EmployeeLeave/UpcomingLeaves.dart';
-import 'package:ecomed/EmployeeLeave/creditleave.dart';
+import 'package:ecomed/Screens/EmployeeLeave/LeaveBalances.dart';
+import 'package:ecomed/Screens/EmployeeLeave/UpcomingLeaves.dart';
+import 'package:ecomed/Screens/EmployeeLeave/creditleave.dart';
 import 'package:ecomed/styles/DrawerWidget.dart';
 import 'package:ecomed/styles/styles.dart';
 import 'package:flutter/material.dart';

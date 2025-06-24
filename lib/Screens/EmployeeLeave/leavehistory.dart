@@ -1,7 +1,7 @@
 import 'package:ecomed/ApiCalls/ApiCalls.dart';
-import 'package:ecomed/EmployeeLeave/LeaveHistoryCard.dart';
-import 'package:ecomed/EmployeeLeave/LeaveTracker.dart';
-import 'package:ecomed/EmployeeLeave/WfhHistoryCard.dart';
+import 'package:ecomed/Screens/EmployeeLeave/LeaveHistoryCard.dart';
+import 'package:ecomed/Screens/EmployeeLeave/LeaveTracker.dart';
+import 'package:ecomed/Screens/EmployeeLeave/WfhHistoryCard.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';

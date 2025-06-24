@@ -1,4 +1,4 @@
-import 'package:ecomed/EmployeeLeave/LeaveTracker.dart';
+import 'package:ecomed/Screens/EmployeeLeave/LeaveTracker.dart';
 import 'package:ecomed/styles/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';

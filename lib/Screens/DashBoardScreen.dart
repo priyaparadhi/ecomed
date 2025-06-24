@@ -1,4 +1,6 @@
-import 'package:ecomed/EmployeeLeave/LeaveRequest.dart';
+import 'package:ecomed/Screens/EmployeeLeave/LeaveRequest.dart';
+import 'package:ecomed/Screens/Tasks/DailyPlan/AddTaskPage.dart';
+import 'package:ecomed/Screens/Tasks/employessTasks.dart';
 import 'package:ecomed/styles/DrawerWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -59,8 +61,14 @@ class HRDashboardScreen extends StatelessWidget {
                 ),
                 _dashboardCard(LucideIcons.userCheck, 'Attendance', 95,
                     Colors.lightBlueAccent.shade100),
-                _dashboardCard(LucideIcons.clipboardList, 'Daily Plans', 15,
-                    Colors.tealAccent.shade100),
+                _dashboardCard(LucideIcons.clipboardList, 'Tasks', 15,
+                    Colors.tealAccent.shade100, onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => EmployeesTasksPage()),
+                  );
+                }),
                 _dashboardCard(LucideIcons.users2, 'Total Employees', 50,
                     Colors.cyanAccent.shade100),
               ],

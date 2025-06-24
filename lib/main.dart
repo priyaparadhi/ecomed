@@ -1,4 +1,4 @@
-import 'package:ecomed/Authentication/loginPage.dart';
+import 'package:ecomed/Screens/Authentication/loginPage.dart';
 import 'package:ecomed/Screens/DashBoardScreen.dart';
 import 'package:ecomed/Screens/UserDashboardScreen.dart';
 import 'package:ecomed/Services/Internet.dart';

@@ -1,7 +1,7 @@
 import 'package:ecomed/ApiCalls/ApiCalls.dart';
-import 'package:ecomed/EmployeeLeave/LeaveForm.dart';
-import 'package:ecomed/EmployeeLeave/WfhForm.dart';
-import 'package:ecomed/EmployeeLeave/leavehistory.dart';
+import 'package:ecomed/Screens/EmployeeLeave/LeaveForm.dart';
+import 'package:ecomed/Screens/EmployeeLeave/WfhForm.dart';
+import 'package:ecomed/Screens/EmployeeLeave/leavehistory.dart';
 import 'package:ecomed/styles/DrawerWidget.dart';
 import 'package:ecomed/styles/styles.dart';
 import 'package:flutter/material.dart';

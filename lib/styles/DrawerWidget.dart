@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:ecomed/ApiCalls/ApiCalls.dart';
-import 'package:ecomed/Authentication/Logout.dart';
-import 'package:ecomed/Authentication/loginPage.dart';
-import 'package:ecomed/EmployeeLeave/LeaveRequest.dart';
-import 'package:ecomed/EmployeeLeave/LeaveTracker.dart';
+import 'package:ecomed/Screens/Authentication/Logout.dart';
+import 'package:ecomed/Screens/Authentication/loginPage.dart';
+import 'package:ecomed/Screens/EmployeeLeave/LeaveRequest.dart';
+import 'package:ecomed/Screens/EmployeeLeave/LeaveTracker.dart';
 import 'package:ecomed/Screens/DashBoardScreen.dart';
 import 'package:ecomed/Screens/UserDashboardScreen.dart';
 import 'package:ecomed/styles/styles.dart';

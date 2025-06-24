@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'package:ecomed/EmployeeLeave/LeaveTracker.dart';
+import 'package:ecomed/Models/TaskModel.dart';
+import 'package:ecomed/Screens/EmployeeLeave/LeaveTracker.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
@@ -785,6 +786,142 @@ class ApiCalls {
       }
     } else {
       throw Exception('Failed to login');
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> fetchPriorities() async {
+    final response = await http.get(Uri.parse('${baseurl}priority_dropdown'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body);
+      return data.cast<Map<String, dynamic>>();
+    } else {
+      throw Exception('Failed to load priorities');
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> fetchTaskStatuses() async {
+    final response =
+        await http.get(Uri.parse('${baseurl}task_status_dropdown'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.cast<Map<String, dynamic>>();
+    } else {
+      throw Exception('Failed to load task statuses');
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> fetchUsers() async {
+    final response = await http.get(Uri.parse('${baseurl}user_dropdown'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.cast<Map<String, dynamic>>();
+    } else {
+      throw Exception('Failed to load users');
+    }
+  }
+
+  static Future<Map<String, dynamic>> addTask({
+    required String taskName,
+    required List<int> assignedTo,
+    required String startDate,
+    required String endDate,
+    required int priorityId,
+    required int taskStatusId,
+  }) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final response = await http.post(
+      Uri.parse('${baseurl}add_task'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        "task_name": taskName,
+        "assigned_to": assignedTo,
+        "task_start_date": startDate,
+        "task_end_date": endDate,
+        "priority_id": priorityId,
+        "task_status_id": taskStatusId,
+        "created_by": '${prefs.getInt("user_id")}',
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to add task');
+    }
+  }
+
+  static Future<List<Task>> fetchAllTasks() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final url = Uri.parse('${baseurl}fetch_all_tasks');
+
+    final int? userId = prefs.getInt("user_id");
+    final Map<String, dynamic> requestBody = {
+      "user_id": userId // Send as int, not string
+    };
+
+    print('📤 Request URL: $url');
+    print('📤 Request Body: ${jsonEncode(requestBody)}');
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(requestBody),
+    );
+
+    print('📥 Response Status Code: ${response.statusCode}');
+    print('📥 Response Body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      if (jsonResponse['success'] == true) {
+        final List tasksJson = jsonResponse['data'];
+        return tasksJson.map((e) => Task.fromJson(e)).toList();
+      } else {
+        throw Exception('Error fetching tasks.');
+      }
+    } else {
+      throw Exception('Failed to load tasks.');
+    }
+  }
+
+  static Future<void> addTimesheet({
+    required int userId,
+    required int taskId,
+    required int taskStatusId,
+    required String workDate,
+    required String startTime,
+    required String endTime,
+    required String comment,
+  }) async {
+    final url = Uri.parse('${baseurl}add_timesheet');
+
+    final requestBody = {
+      "user_id": userId,
+      "task_id": taskId,
+      "task_status_id": taskStatusId,
+      "work_date": workDate,
+      "start_time": startTime,
+      "end_time": endTime,
+      "comment": comment,
+    };
+
+    print('🔵 Request Body: ${jsonEncode(requestBody)}');
+
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(requestBody),
+    );
+
+    print('🟢 Response Status Code: ${response.statusCode}');
+    print('🟢 Response Body: ${response.body}');
+
+    final data = jsonDecode(response.body);
+    if (!data['success']) {
+      throw Exception(data['message'] ?? 'Failed to add timesheet');
     }
   }
 }

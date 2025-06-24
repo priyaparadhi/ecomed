@@ -1,6 +1,7 @@
 import 'dart:convert';
 
-import 'package:ecomed/EmployeeLeave/LeaveTracker.dart';
+import 'package:ecomed/Screens/EmployeeLeave/LeaveTracker.dart';
+import 'package:ecomed/Screens/Tasks/DailyPlan/TaskList.dart';
 import 'package:ecomed/styles/DrawerWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -597,12 +598,21 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8F9FB),
       drawer: DrawerWidget(),
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        elevation: 0,
+        title: Text(
+          'Dashboard',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.black87,
+          ),
+        ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
+        iconTheme: const IconThemeData(color: Colors.black87),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -611,10 +621,10 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
           children: [
             Text(
               'Welcome back, Priya 👋',
-              style: TextStyle(
+              style: GoogleFonts.poppins(
                 fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
               ),
             ),
             const SizedBox(height: 24),
@@ -628,32 +638,53 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
               physics: const NeverScrollableScrollPhysics(),
               children: [
                 UserStatCard(
-                    title: 'Completed Plans',
+                    title: 'Completed Tasks',
                     count: 12,
                     icon: LucideIcons.checkCircle2,
-                    color: secondaryColor),
+                    color: Colors.green),
+                UserStatCard(
+                    title: 'Pending Tasks',
+                    count: 8,
+                    icon: LucideIcons.clock,
+                    color: Colors.orange,
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => TaskListPage()));
+                    }),
+                UserStatCard(
+                    title: 'Completed Plans',
+                    count: 6,
+                    icon: LucideIcons.calendarCheck,
+                    color: Colors.teal),
                 UserStatCard(
                     title: 'Pending Plans',
                     count: 4,
-                    icon: LucideIcons.clock4,
-                    color: secondaryColor),
+                    icon: LucideIcons.calendarClock,
+                    color: Colors.red,
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => TaskListPage()));
+                    }),
                 UserStatCard(
                     title: 'Attendance',
                     count: 22,
                     icon: LucideIcons.userCheck,
-                    color: secondaryColor),
+                    color: Colors.indigo),
                 UserStatCard(
-                  title: 'Leaves',
-                  count: 2,
-                  icon: LucideIcons.leaf,
-                  color: secondaryColor,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => LeaveTracker()),
-                    );
-                  },
-                ),
+                    title: 'Leaves',
+                    count: 2,
+                    icon: LucideIcons.leaf,
+                    color: Colors.deepPurple,
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => LeaveTracker()));
+                    }),
               ],
             ),
 
@@ -662,35 +693,25 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
             const SizedBox(height: 12),
             SizedBox(
                 height: 200,
-                child: TaskCompletionChart(primaryColor: primaryColor)),
+                child: TaskCompletionChart(primaryColor: Colors.teal)),
 
             const SizedBox(height: 32),
             const SectionTitle(label: 'Weekly Attendance'),
             const SizedBox(height: 12),
             SizedBox(
                 height: 240,
-                child: WeeklyAttendanceChart(primaryColor: primaryColor)),
+                child: WeeklyAttendanceChart(primaryColor: Colors.indigo)),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: primaryColor,
+        backgroundColor: Colors.teal,
         child: const Icon(Icons.add),
         onPressed: () async {
           SharedPreferences preferences = await SharedPreferences.getInstance();
           Position position = await _determinePosition();
-
           print(position);
-          // if (!(preferences.getBool("privacy_Terms") ?? false)) {
-          //   termsAndCondition();
-          // }
-          if (true) {
-            _showAlertDialog(false);
-          }
-          //else {
-          // _determinePosition(); // Commented out as requested
-          // print("Sorry!!!!!");
-          // }
+          _showAlertDialog(false);
         },
       ),
     );
@@ -703,48 +724,41 @@ class UserStatCard extends StatelessWidget {
   final int count;
   final IconData icon;
   final Color color;
-  final VoidCallback? onTap; // ✅ NEW
+  final VoidCallback? onTap;
 
   const UserStatCard({
     required this.title,
     required this.count,
     required this.icon,
     required this.color,
-    this.onTap, // ✅ NEW
+    this.onTap,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: color.withOpacity(0.15),
-      borderRadius: BorderRadius.circular(14),
+      elevation: 4,
+      borderRadius: BorderRadius.circular(20),
+      color: Colors.white,
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: onTap, // ✅ UPDATED
+        borderRadius: BorderRadius.circular(20),
+        onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 28, color: color),
+              Icon(icon, size: 30, color: color),
               const SizedBox(height: 12),
-              Text(
-                '$count',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: color.withOpacity(0.8),
-                ),
-              ),
+              Text('$count',
+                  style: GoogleFonts.poppins(
+                      fontSize: 24, fontWeight: FontWeight.bold, color: color)),
+              const SizedBox(height: 6),
+              Text(title,
+                  textAlign: TextAlign.center,
+                  style:
+                      GoogleFonts.poppins(fontSize: 13, color: Colors.black54)),
             ],
           ),
         ),
@@ -762,10 +776,10 @@ class SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: TextStyle(
+      style: GoogleFonts.poppins(
         fontSize: 18,
         fontWeight: FontWeight.w600,
-        color: Colors.black,
+        color: Colors.black87,
       ),
     );
   }
@@ -779,26 +793,48 @@ class TaskCompletionChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PieChart(
-      PieChartData(
-        centerSpaceRadius: 40,
-        sectionsSpace: 4,
-        sections: [
-          PieChartSectionData(
-            color: primaryColor,
-            value: 75,
-            title: '75%\nDone',
-            titleStyle: const TextStyle(fontSize: 14, color: Colors.white),
-            radius: 60,
-          ),
-          PieChartSectionData(
-            color: Colors.blue.shade100,
-            value: 25,
-            title: '25%\nPending',
-            titleStyle: const TextStyle(fontSize: 14, color: Colors.black),
-            radius: 60,
-          ),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x22000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          )
         ],
+      ),
+      child: PieChart(
+        PieChartData(
+          centerSpaceRadius: 40,
+          sectionsSpace: 4,
+          sections: [
+            PieChartSectionData(
+              color: primaryColor,
+              value: 75,
+              title: '75%\nDone',
+              titleStyle: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+              radius: 60,
+            ),
+            PieChartSectionData(
+              color: Colors.grey.shade300,
+              value: 25,
+              title: '25%\nPending',
+              titleStyle: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+              radius: 60,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -813,50 +849,79 @@ class WeeklyAttendanceChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = [8, 7, 9, 8, 6, 7, 5];
-    return BarChart(
-      BarChartData(
-        maxY: 10,
-        barGroups: List.generate(data.length, (i) {
-          return BarChartGroupData(x: i, barRods: [
-            BarChartRodData(
-              toY: data[i].toDouble(),
-              width: 16,
-              borderRadius: BorderRadius.circular(6),
-              color: primaryColor,
-              backDrawRodData: BackgroundBarChartRodData(
-                show: true,
-                toY: 10,
-                color: Colors.blue.shade100,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x22000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          )
+        ],
+      ),
+      child: BarChart(
+        BarChartData(
+          maxY: 10,
+          barGroups: List.generate(data.length, (i) {
+            return BarChartGroupData(x: i, barRods: [
+              BarChartRodData(
+                toY: data[i].toDouble(),
+                width: 16,
+                borderRadius: BorderRadius.circular(8),
+                gradient: LinearGradient(
+                  colors: [primaryColor.withOpacity(0.8), primaryColor],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                ),
+                backDrawRodData: BackgroundBarChartRodData(
+                  show: true,
+                  toY: 10,
+                  color: Colors.grey.shade200,
+                ),
+              )
+            ]);
+          }),
+          titlesData: FlTitlesData(
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, _) {
+                  const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      days[value.toInt()],
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: primaryColor,
+                      ),
+                    ),
+                  );
+                },
               ),
-            )
-          ]);
-        }),
-        titlesData: FlTitlesData(
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, _) {
-                const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-                return Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(days[value.toInt()],
-                      style: TextStyle(fontSize: 12, color: primaryColor)),
-                );
-              },
+            ),
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                reservedSize: 30,
+                showTitles: true,
+                interval: 2,
+                getTitlesWidget: (value, _) => Text(
+                  '${value.toInt()}',
+                  style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ),
             ),
           ),
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              reservedSize: 28,
-              showTitles: true,
-              interval: 2,
-              getTitlesWidget: (value, _) => Text('${value.toInt()}',
-                  style: TextStyle(fontSize: 10, color: primaryColor)),
-            ),
-          ),
+          gridData: FlGridData(show: false),
+          borderData: FlBorderData(show: false),
         ),
-        gridData: FlGridData(show: false),
-        borderData: FlBorderData(show: false),
       ),
     );
   }
