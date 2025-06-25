@@ -1,7 +1,8 @@
 import 'dart:convert';
 
+import 'package:ecomed/Screens/DailyPlan/DailyPlanList.dart';
 import 'package:ecomed/Screens/EmployeeLeave/LeaveTracker.dart';
-import 'package:ecomed/Screens/Tasks/DailyPlan/TaskList.dart';
+import 'package:ecomed/Screens/Tasks/Tasks/TaskList.dart';
 import 'package:ecomed/styles/DrawerWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -667,7 +668,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => TaskListPage()));
+                              builder: (context) => DailyPlanPage()));
                     }),
                 UserStatCard(
                     title: 'Attendance',
@@ -706,7 +707,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.teal,
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.checklist),
         onPressed: () async {
           SharedPreferences preferences = await SharedPreferences.getInstance();
           Position position = await _determinePosition();

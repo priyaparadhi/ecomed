@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'package:ecomed/Models/AttendenceModel.dart';
 import 'package:ecomed/Models/TaskModel.dart';
+import 'package:ecomed/Models/Timesheetmodel.dart';
 import 'package:ecomed/Screens/EmployeeLeave/LeaveTracker.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -922,6 +924,119 @@ class ApiCalls {
     final data = jsonDecode(response.body);
     if (!data['success']) {
       throw Exception(data['message'] ?? 'Failed to add timesheet');
+    }
+  }
+
+  static Future<List<TimesheetEntry>> fetchTimesheetByUser() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int? userId = prefs.getInt("user_id");
+    final url = Uri.parse('${baseurl}fetch_timesheet_by_user');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({"user_id": userId}),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['success'] == true) {
+        final List list = data['data'];
+        return list.map((json) => TimesheetEntry.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to load timesheet data');
+      }
+    } else {
+      throw Exception('Server Error: ${response.statusCode}');
+    }
+  }
+
+  static Future<List<AttendanceRecord>> fetchAllAttendance({
+    int? userId,
+    required String date,
+  }) async {
+    final url = Uri.parse('${baseurl}fetch_all_attendance');
+
+    final Map<String, dynamic> requestBody = {
+      'user_id': userId, // Will be null if not selected
+      'date': date, // Format: 'yyyy-MM-dd'
+    };
+
+    print("🔵 Request Body: ${jsonEncode(requestBody)}");
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(requestBody),
+    );
+
+    print("🟢 Response Status Code: ${response.statusCode}");
+    print("🟢 Response Body: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+      return data.map((e) => AttendanceRecord.fromJson(e)).toList();
+    } else {
+      throw Exception('❌ Failed to load attendance: ${response.body}');
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> fetchPlanType() async {
+    final response = await http.get(Uri.parse('${baseurl}fetch_plan_type'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body);
+      return data.cast<Map<String, dynamic>>();
+    } else {
+      throw Exception('Failed to load plan type');
+    }
+  }
+
+  static Future<Map<String, dynamic>> addDailyPlan({
+    required int taskId,
+    required int userId,
+    required String planName,
+    required String planDate,
+    required int statusId,
+    required int priorityId,
+    required int planTypeId,
+    String? achievements,
+    String? comments,
+  }) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int? createdBy = prefs.getInt("user_id");
+
+    final Map<String, dynamic> requestBody = {
+      "task_id": taskId,
+      "user_id": userId,
+      "plan_name": planName,
+      "achievements": achievements,
+      "comments": comments,
+      "plan_date": planDate,
+      "status_id": statusId,
+      "priority_id": priorityId,
+      "plan_type_id": planTypeId,
+      "created_by": createdBy
+    };
+
+    // 🔍 Print the request body
+    print("🔼 Request to add_daily_plan:");
+    print(jsonEncode(requestBody));
+
+    final response = await http.post(
+      Uri.parse('${baseurl}add_daily_plan'),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(requestBody),
+    );
+
+    // 🔽 Print the response
+    print("🔽 Response from add_daily_plan:");
+    print("Status Code: ${response.statusCode}");
+    print("Body: ${response.body}");
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to add daily plan');
     }
   }
 }

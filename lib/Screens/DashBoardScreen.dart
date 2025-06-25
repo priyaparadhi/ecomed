@@ -1,5 +1,7 @@
+import 'package:ecomed/Screens/Attendence/AttendenceHistory.dart';
+import 'package:ecomed/Screens/DailyPlan/EmployeesDailyPlans.dart';
 import 'package:ecomed/Screens/EmployeeLeave/LeaveRequest.dart';
-import 'package:ecomed/Screens/Tasks/DailyPlan/AddTaskPage.dart';
+import 'package:ecomed/Screens/Tasks/Tasks/AddTaskPage.dart';
 import 'package:ecomed/Screens/Tasks/employessTasks.dart';
 import 'package:ecomed/styles/DrawerWidget.dart';
 import 'package:flutter/material.dart';
@@ -45,8 +47,19 @@ class HRDashboardScreen extends StatelessWidget {
               children: [
                 _dashboardCard(LucideIcons.checkCircle2, 'Completed Plans', 124,
                     Colors.greenAccent.shade100),
-                _dashboardCard(LucideIcons.clock, 'Pending Plans', 32,
-                    Colors.orangeAccent.shade100),
+                _dashboardCard(
+                  LucideIcons.clock,
+                  'Pending Plans',
+                  32,
+                  Colors.orangeAccent.shade100,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => DailyPlanPageForAdmin()),
+                    );
+                  },
+                ),
                 _dashboardCard(
                   LucideIcons.calendarDays,
                   'Leaves',
@@ -59,8 +72,19 @@ class HRDashboardScreen extends StatelessWidget {
                     );
                   },
                 ),
-                _dashboardCard(LucideIcons.userCheck, 'Attendance', 95,
-                    Colors.lightBlueAccent.shade100),
+                _dashboardCard(
+                  LucideIcons.userCheck,
+                  'Attendance',
+                  95,
+                  Colors.lightBlueAccent.shade100,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => AttendanceHistoryPage()),
+                    );
+                  },
+                ),
                 _dashboardCard(LucideIcons.clipboardList, 'Tasks', 15,
                     Colors.tealAccent.shade100, onTap: () {
                   Navigator.push(

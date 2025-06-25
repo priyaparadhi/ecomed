@@ -1,6 +1,7 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:ecomed/ApiCalls/ApiCalls.dart';
 import 'package:ecomed/Models/TaskModel.dart';
+import 'package:ecomed/Screens/Tasks/Tasks/Timesheet.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -320,22 +321,59 @@ class _TaskListPageState extends State<TaskListPage> {
 
                 const SizedBox(height: 16),
 
-                /// Save Button
+                /// Save & Timesheet Buttons Row
                 Align(
                   alignment: Alignment.center,
-                  child: ElevatedButton.icon(
-                    icon: Icon(Icons.save, size: 18),
-                    label: Text("Save", style: TextStyle(fontSize: 14)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 142, 177, 237),
-                      foregroundColor: Colors.white,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      /// Save Button
+                      ElevatedButton.icon(
+                        icon: Icon(Icons.save, size: 18),
+                        label: Text("Save", style: TextStyle(fontSize: 14)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.indigo,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () => _submitTimesheet(setInnerState),
                       ),
-                    ),
-                    onPressed: () => _submitTimesheet(setInnerState),
+
+                      const SizedBox(width: 24),
+
+                      /// Timesheet Icon + Text (clickable)
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  TimesheetPage(), // dynamic ID if needed
+                            ),
+                          );
+                        },
+                        child: Row(
+                          children: [
+                            Icon(Icons.access_time_filled_rounded,
+                                color: Colors.indigo, size: 20),
+                            const SizedBox(width: 6),
+                            Text(
+                              "View Timesheet",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.indigo,
+                                fontWeight: FontWeight.w500,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

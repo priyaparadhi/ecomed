@@ -152,7 +152,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Add Plan'),
+        title: const Text('Add Task'),
         backgroundColor: Colors.white,
         centerTitle: true,
       ),
@@ -172,7 +172,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Create a new Plan',
+                    'Create a new Task',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.black87,

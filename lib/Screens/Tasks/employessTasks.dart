@@ -1,7 +1,8 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:ecomed/ApiCalls/ApiCalls.dart';
 import 'package:ecomed/Models/TaskModel.dart';
-import 'package:ecomed/Screens/Tasks/DailyPlan/AddTaskPage.dart';
+import 'package:ecomed/Screens/DailyPlan/AddDailyPlan.dart';
+import 'package:ecomed/Screens/Tasks/Tasks/AddTaskPage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -181,11 +182,19 @@ class _TaskListPageState extends State<EmployeesTasksPage> {
                   ),
                 ),
                 IconButton(
-                  tooltip: "Comments",
-                  icon: const Icon(Icons.comment_outlined,
-                      color: Colors.blueAccent),
+                  tooltip: "Add Daily Plan",
+                  icon: const Icon(
+                    Icons.playlist_add, // or Icons.event_note_outlined
+                    color: Colors.blueAccent,
+                  ),
                   onPressed: () {
-                    // TODO: Handle comment icon pressed
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            AddDailyPlanPage(taskId: task.taskId),
+                      ),
+                    );
                   },
                 ),
               ],
