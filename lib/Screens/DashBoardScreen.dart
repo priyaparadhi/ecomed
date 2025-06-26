@@ -46,7 +46,13 @@ class HRDashboardScreen extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               children: [
                 _dashboardCard(LucideIcons.checkCircle2, 'Completed Plans', 124,
-                    Colors.greenAccent.shade100),
+                    Colors.greenAccent.shade100, onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => DailyPlanPageForAdmin()),
+                  );
+                }),
                 _dashboardCard(
                   LucideIcons.clock,
                   'Pending Plans',

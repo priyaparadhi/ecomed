@@ -5,14 +5,14 @@ import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class DailyPlanPage extends StatefulWidget {
-  const DailyPlanPage({super.key});
+class CompletedDailyPlanPage extends StatefulWidget {
+  const CompletedDailyPlanPage({super.key});
 
   @override
-  State<DailyPlanPage> createState() => _DailyPlanPageState();
+  State<CompletedDailyPlanPage> createState() => _DailyPlanPageState();
 }
 
-class _DailyPlanPageState extends State<DailyPlanPage> {
+class _DailyPlanPageState extends State<CompletedDailyPlanPage> {
   DateTime _selectedDate = DateTime.now();
 
   List<DailyPlan> _plans = [];

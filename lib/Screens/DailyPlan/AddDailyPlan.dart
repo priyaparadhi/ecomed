@@ -27,10 +27,16 @@ class _AddDailyPlanPageState extends State<AddDailyPlanPage> {
   List<Map<String, dynamic>> _planTypeList = [];
   int? _selectedPlanTypeId;
   List<Map<String, dynamic>> _taskStatusList = [];
-  int? _selectedTaskStatusId;
+
   String? _selectedUser, _selectedStatus, _selectedPriority, _selectedPlanType;
   DateTime? _selectedDate;
+  int? _selectedTaskStatusId;
 
+  final List<Map<String, dynamic>> taskStatusOptions = [
+    {'id': 1, 'label': 'Pending'},
+    {'id': 2, 'label': 'Not Done'},
+    {'id': 3, 'label': 'Done'},
+  ];
   @override
   void initState() {
     super.initState();
@@ -296,35 +302,21 @@ class _AddDailyPlanPageState extends State<AddDailyPlanPage> {
                   onChanged: (val) => setState(() => _selectedPriorityId = val),
                 ),
                 const SizedBox(height: 16),
-                DropdownSearch<Map<String, dynamic>>(
-                  items: _taskStatusList,
-                  itemAsString: (Map<String, dynamic>? item) =>
-                      item?['task_status'] ?? '',
-                  dropdownDecoratorProps: DropDownDecoratorProps(
-                    dropdownSearchDecoration: InputDecoration(
-                      labelText: "Task Status",
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16)),
-                    ),
-                  ),
-                  selectedItem: _taskStatusList.firstWhere(
-                    (item) => item['task_status_id'] == _selectedTaskStatusId,
-                    orElse: () => {},
-                  ),
-                  onChanged: (val) {
+                DropdownButtonFormField<int>(
+                  decoration:
+                      _inputDecoration("Status", icon: Icons.flag_outlined),
+                  value: _selectedTaskStatusId,
+                  items: taskStatusOptions.map((status) {
+                    return DropdownMenuItem<int>(
+                      value: status['id'],
+                      child: Text(status['label']),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
                     setState(() {
-                      _selectedTaskStatusId = val?['task_status_id'] as int?;
+                      _selectedTaskStatusId = value;
                     });
                   },
-                  popupProps: const PopupProps.menu(
-                    showSearchBox: true,
-                    searchFieldProps: TextFieldProps(
-                      decoration: InputDecoration(
-                        labelText: 'Search Status',
-                        prefixIcon: Icon(Icons.search),
-                      ),
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<int>(

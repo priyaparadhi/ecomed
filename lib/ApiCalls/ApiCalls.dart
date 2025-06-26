@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:ecomed/Models/AttendenceModel.dart';
+import 'package:ecomed/Models/DailyPlanModel.dart';
 import 'package:ecomed/Models/TaskModel.dart';
 import 'package:ecomed/Models/Timesheetmodel.dart';
 import 'package:ecomed/Screens/EmployeeLeave/LeaveTracker.dart';
@@ -1037,6 +1038,112 @@ class ApiCalls {
       return jsonDecode(response.body);
     } else {
       throw Exception('Failed to add daily plan');
+    }
+  }
+
+  static Future<List<DailyPlan>> fetchDailyPlans({
+    required String planDate,
+    required int userId,
+    int? userFilter,
+    int? statusId,
+  }) async {
+    final url = Uri.parse("${baseurl}fetch_daily_plan");
+
+    final requestBody = {
+      "plan_date": planDate,
+      "user_id": userId,
+      "user_filter": userFilter,
+      "status_id": statusId,
+    };
+
+    print("📤 Request to fetch_daily_plan:");
+    print(jsonEncode(requestBody));
+
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(requestBody),
+    );
+
+    print("📥 Response status: ${response.statusCode}");
+    print("📥 Response body: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(response.body);
+      if (jsonData['success'] == true && jsonData['data'] != null) {
+        return (jsonData['data'] as List)
+            .map((item) => DailyPlan.fromJson(item))
+            .toList();
+      } else {
+        return [];
+      }
+    } else {
+      throw Exception("Failed to fetch daily plans");
+    }
+  }
+
+  static Future<bool> updateDailyPlanAchievement({
+    required int planId,
+    required String achievements,
+    required int createdBy,
+  }) async {
+    final url = Uri.parse("${baseurl}update_daily_plan");
+
+    final body = {
+      "plan_id": planId,
+      "achievements": achievements,
+      "achievements_created_by": createdBy,
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print("📤 Update Achievement Request: ${jsonEncode(body)}");
+      print("📥 Response (${response.statusCode}): ${response.body}");
+
+      final jsonData = jsonDecode(response.body);
+      return jsonData['success'] == true;
+    } catch (e) {
+      print("❌ Error updating achievement: $e");
+      return false;
+    }
+  }
+
+  static Future<bool> updateDailyPlanComment({
+    required int planId,
+    required String comments,
+    required int statusId,
+  }) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int? createdBy = prefs.getInt("user_id");
+    final url = Uri.parse("${baseurl}update_daily_plan");
+
+    final body = {
+      "plan_id": planId,
+      "comments": comments,
+      "comment_created_by": createdBy,
+      "status_id": statusId
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print("📤 Update Achievement Request: ${jsonEncode(body)}");
+      print("📥 Response (${response.statusCode}): ${response.body}");
+
+      final jsonData = jsonDecode(response.body);
+      return jsonData['success'] == true;
+    } catch (e) {
+      print("❌ Error updating comment: $e");
+      return false;
     }
   }
 }

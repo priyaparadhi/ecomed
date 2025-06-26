@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:ecomed/Screens/DailyPlan/CompletedMyPlans.dart';
 import 'package:ecomed/Screens/DailyPlan/DailyPlanList.dart';
 import 'package:ecomed/Screens/EmployeeLeave/LeaveTracker.dart';
 import 'package:ecomed/Screens/Tasks/Tasks/TaskList.dart';
@@ -658,7 +659,13 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                     title: 'Completed Plans',
                     count: 6,
                     icon: LucideIcons.calendarCheck,
-                    color: Colors.teal),
+                    color: Colors.teal,
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CompletedDailyPlanPage()));
+                    }),
                 UserStatCard(
                     title: 'Pending Plans',
                     count: 4,

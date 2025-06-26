@@ -335,117 +335,116 @@ class _DrawerWidgetState extends State<DrawerWidget> {
           //   },
           // ),
 
-          ExpansionTile(
-            title: Text("CRM"),
-            leading: const Icon(
-              Icons.person_outline_outlined,
-              color: Colors.blueAccent, // Set your desired color here
-            ),
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
-                child: ListTile(
-                  title: const Text(
-                    "Enquiries",
-                    style: TextStyle(fontSize: 15),
-                  ),
-                  leading: const Icon(
-                    Icons.question_answer_outlined,
-                    color: Colors.lightBlue,
-                    size: 20,
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    // Navigator.push(context,
-                    //     MaterialPageRoute(builder: (context) => MyEnquire()));
+          // ExpansionTile(
+          //   title: Text("CRM"),
+          //   leading: const Icon(
+          //     Icons.person_outline_outlined,
+          //     color: Colors.blueAccent, // Set your desired color here
+          //   ),
+          //   children: [
+          //     Padding(
+          //       padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
+          //       child: ListTile(
+          //         title: const Text(
+          //           "Enquiries",
+          //           style: TextStyle(fontSize: 15),
+          //         ),
+          //         leading: const Icon(
+          //           Icons.question_answer_outlined,
+          //           color: Colors.lightBlue,
+          //           size: 20,
+          //         ),
+          //         onTap: () {
+          //           Navigator.pop(context);
+          //           // Navigator.push(context,
+          //           //     MaterialPageRoute(builder: (context) => MyEnquire()));
 
-                    // Navigator.pushAndRemoveUntil(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //       builder: (context) => const MyEnquire()),
-                    //   (Route<dynamic> route) =>
-                    //       route.settings.name == '/HomeScreen' || route.isFirst,
-                    // );
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
-                child: ListTile(
-                  title: const Text("Contact",
-                      style: TextStyle(
-                        fontSize: 15,
-                      )),
-                  leading: const Icon(Icons.contact_page_rounded,
-                      color: Colors.lightBlue, size: 20),
-                  onTap: () {
-                    Navigator.pop(context);
-                    // Navigator.push(context,
-                    //     MaterialPageRoute(builder: (context) => ContactsPage()));
+          //           // Navigator.pushAndRemoveUntil(
+          //           //   context,
+          //           //   MaterialPageRoute(
+          //           //       builder: (context) => const MyEnquire()),
+          //           //   (Route<dynamic> route) =>
+          //           //       route.settings.name == '/HomeScreen' || route.isFirst,
+          //           // );
+          //         },
+          //       ),
+          //     ),
+          //     Padding(
+          //       padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
+          //       child: ListTile(
+          //         title: const Text("Contact",
+          //             style: TextStyle(
+          //               fontSize: 15,
+          //             )),
+          //         leading: const Icon(Icons.contact_page_rounded,
+          //             color: Colors.lightBlue, size: 20),
+          //         onTap: () {
+          //           Navigator.pop(context);
+          //           // Navigator.push(context,
+          //           //     MaterialPageRoute(builder: (context) => ContactsPage()));
 
-                    // Navigator.pushAndRemoveUntil(
-                    //   context,
-                    //   MaterialPageRoute(builder: (context) => ContactsPage()),
-                    //   (Route<dynamic> route) =>
-                    //       route.settings.name == '/HomeScreen' || route.isFirst,
-                    // );
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
-                child: ListTile(
-                  title:
-                      const Text("Companies", style: TextStyle(fontSize: 15)),
-                  leading: const Icon(
-                    Icons.apartment_outlined,
-                    size: 20,
-                    color: Colors.lightBlue,
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
+          //           // Navigator.pushAndRemoveUntil(
+          //           //   context,
+          //           //   MaterialPageRoute(builder: (context) => ContactsPage()),
+          //           //   (Route<dynamic> route) =>
+          //           //       route.settings.name == '/HomeScreen' || route.isFirst,
+          //           // );
+          //         },
+          //       ),
+          //     ),
+          //     Padding(
+          //       padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
+          //       child: ListTile(
+          //         title:
+          //             const Text("Companies", style: TextStyle(fontSize: 15)),
+          //         leading: const Icon(
+          //           Icons.apartment_outlined,
+          //           size: 20,
+          //           color: Colors.lightBlue,
+          //         ),
+          //         onTap: () {
+          //           Navigator.pop(context);
 
-                    // Navigator.push(context,
-                    //     MaterialPageRoute(builder: (context) => CompaniesPage()));
+          //           // Navigator.push(context,
+          //           //     MaterialPageRoute(builder: (context) => CompaniesPage()));
 
-                    // Navigator.pushAndRemoveUntil(
-                    //   context,
-                    //   MaterialPageRoute(builder: (context) => CompaniesPage()),
-                    //   (Route<dynamic> route) =>
-                    //       route.settings.name == '/HomeScreen' || route.isFirst,
-                    // );
-                  },
-                ),
-              ),
-            ],
-          ),
+          //           // Navigator.pushAndRemoveUntil(
+          //           //   context,
+          //           //   MaterialPageRoute(builder: (context) => CompaniesPage()),
+          //           //   (Route<dynamic> route) =>
+          //           //       route.settings.name == '/HomeScreen' || route.isFirst,
+          //           // );
+          //         },
+          //       ),
+          //     ),
+          //   ],
+          // ),
 
           // Visibility(
           //   visible: roleId == 1,
-          //   child:
-          Visibility(
-            visible: !customerSection, // Hide if customerSection is true
-            child: ListTile(
-              title: const Text("My Leaves "),
-              leading: const Icon(
-                Icons.work,
-                color: Colors.teal,
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                // Navigator.push(context,
-                //     MaterialPageRoute(builder: (context) => LeaveTracker()));
+          //   child: Visibility(
+          //     visible: !customerSection, // Hide if customerSection is true
+          //     child: ListTile(
+          //       title: const Text("My Leaves "),
+          //       leading: const Icon(
+          //         Icons.work,
+          //         color: Colors.teal,
+          //       ),
+          //       onTap: () {
+          //         Navigator.pop(context);
+          //         // Navigator.push(context,
+          //         //     MaterialPageRoute(builder: (context) => LeaveTracker()));
 
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => LeaveTracker()),
-                  (Route<dynamic> route) =>
-                      route.settings.name == '/HomeScreen' || route.isFirst,
-                );
-              },
-            ),
-          ),
-
+          //         Navigator.pushAndRemoveUntil(
+          //           context,
+          //           MaterialPageRoute(builder: (context) => LeaveTracker()),
+          //           (Route<dynamic> route) =>
+          //               route.settings.name == '/HomeScreen' || route.isFirst,
+          //         );
+          //       },
+          //     ),
+          //   ),
+          // ),
           Visibility(
             visible: roleId == 1,
             child: ListTile(
