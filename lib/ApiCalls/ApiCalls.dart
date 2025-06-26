@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:ecomed/Models/AttendenceModel.dart';
+import 'package:ecomed/Models/CompaniesModel.dart';
+import 'package:ecomed/Models/ContactModel.dart';
 import 'package:ecomed/Models/DailyPlanModel.dart';
+import 'package:ecomed/Models/EnquiryModel.dart';
 import 'package:ecomed/Models/TaskModel.dart';
 import 'package:ecomed/Models/Timesheetmodel.dart';
 import 'package:ecomed/Screens/EmployeeLeave/LeaveTracker.dart';
@@ -12,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ApiCalls {
   //static String baseurl = "https://portalwiz.net/laravelapi/public/api/";
   static String basestorage = "https://portalwiz.net/laravelapi/storage/app/";
-  static String baseurl = "https://ecomed-dev.portalwiz.in/api/public/api/";
+  static String baseurl = "https://ecomed-test.portalwiz.in/api/public/api/";
   //baseurl = https://portalwiz.net/laravelapi/public/api/
   //basestorage = https://portalwiz.net/laravelapi/storage/app/
   // devurl = https://pw-bms-dev.portalwiz.in
@@ -1144,6 +1147,78 @@ class ApiCalls {
     } catch (e) {
       print("❌ Error updating comment: $e");
       return false;
+    }
+  }
+
+  static Future<List<Contact>> fetchContacts() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int? accountId = prefs.getInt("account_id");
+    final url = Uri.parse('${baseurl}fetch_contact');
+
+    final requestBody = jsonEncode({'account_id': accountId});
+
+    print('📤 REQUEST →');
+    print('URL: $url');
+    print('Headers: ${{'Content-Type': 'application/json'}}');
+    print('Body: $requestBody');
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: requestBody,
+    );
+
+    print('📥 RESPONSE ←');
+    print('Status Code: ${response.statusCode}');
+    print('Body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(response.body);
+      if (jsonData['success'] == true) {
+        return (jsonData['data'] as List)
+            .map((json) => Contact.fromJson(json))
+            .toList();
+      } else {
+        throw Exception('Failed to fetch contacts');
+      }
+    } else {
+      throw Exception('Server error: ${response.statusCode}');
+    }
+  }
+
+  static Future<List<Company>> fetchCompanies() async {
+    final response = await http.get(Uri.parse("${baseurl}fetch_companies"));
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((json) => Company.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to fetch companies');
+    }
+  }
+
+  static Future<List<Enquiry>> fetchEnquiries() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int? accountId = prefs.getInt("account_id");
+    final url = Uri.parse('${baseurl}filtered_enquiries');
+
+    final requestBody = jsonEncode({'account_id': accountId});
+
+    print("📤 REQUEST: $requestBody");
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: requestBody,
+    );
+
+    print("📥 RESPONSE: ${response.statusCode}");
+    print(response.body);
+
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(response.body);
+      return (jsonData as List).map((json) => Enquiry.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to fetch enquiries');
     }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:ecomed/ApiCalls/ApiCalls.dart';
 import 'package:ecomed/Models/TaskModel.dart';
+import 'package:ecomed/Screens/CommentLog/commentLog.dart';
 import 'package:ecomed/Screens/DailyPlan/AddDailyPlan.dart';
 import 'package:ecomed/Screens/Tasks/Tasks/AddTaskPage.dart';
 import 'package:flutter/material.dart';
@@ -21,12 +22,26 @@ class _TaskListPageState extends State<EmployeesTasksPage> {
   String? _error;
   List<Map<String, dynamic>> _taskStatusList = [];
   int? _selectedTaskStatusId;
+  List<Map<String, dynamic>> _assignedUsers = [];
+  int? _selectedUserId;
 
   @override
   void initState() {
     super.initState();
     _fetchTasks();
     _loadTaskStatuses();
+    _loadUsers();
+  }
+
+  Future<void> _loadUsers() async {
+    try {
+      final users = await ApiCalls.fetchUsers();
+      setState(() {
+        _assignedUsers = users;
+      });
+    } catch (e) {
+      print('Error loading users: $e');
+    }
   }
 
   String _convertTimeTo24Hr(TimeOfDay time) {
@@ -184,7 +199,7 @@ class _TaskListPageState extends State<EmployeesTasksPage> {
                 IconButton(
                   tooltip: "Add Daily Plan",
                   icon: const Icon(
-                    Icons.playlist_add, // or Icons.event_note_outlined
+                    Icons.playlist_add,
                     color: Colors.blueAccent,
                   ),
                   onPressed: () {
@@ -193,6 +208,21 @@ class _TaskListPageState extends State<EmployeesTasksPage> {
                       MaterialPageRoute(
                         builder: (context) =>
                             AddDailyPlanPage(taskId: task.taskId),
+                      ),
+                    );
+                  },
+                ),
+                IconButton(
+                  tooltip: "View Comments",
+                  icon: const Icon(
+                    Icons.comment_outlined,
+                    color: Colors.deepPurple,
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CommentLogScreen(),
                       ),
                     );
                   },
@@ -253,10 +283,13 @@ class _TaskListPageState extends State<EmployeesTasksPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Task List',
           style: TextStyle(
-              fontSize: 20, fontWeight: FontWeight.w600, color: Colors.black87),
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
         ),
         backgroundColor: Colors.white,
         centerTitle: true,
@@ -267,20 +300,94 @@ class _TaskListPageState extends State<EmployeesTasksPage> {
           ? const Center(child: CircularProgressIndicator())
           : _error != null
               ? Center(child: Text('Error: $_error'))
-              : _tasks.isEmpty
-                  ? const Center(child: Text('No tasks found'))
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: _tasks.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 20),
-                          child: _buildTaskCard(_tasks[index]),
-                        );
-                      },
+              : Column(
+                  children: [
+                    // Filter section
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: DropdownSearch<Map<String, dynamic>>(
+                            items: _assignedUsers,
+                            itemAsString: (user) =>
+                                "${user['first_name']} ${user['last_name']}",
+                            dropdownDecoratorProps: DropDownDecoratorProps(
+                              dropdownSearchDecoration: InputDecoration(
+                                labelText: "Filter by User",
+                                labelStyle: const TextStyle(
+                                    fontWeight: FontWeight.w500),
+                                filled: true,
+                                fillColor: Colors.grey.shade50,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                                prefixIcon: const Icon(Icons.filter_list),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
+                              ),
+                            ),
+                            popupProps: PopupProps.menu(
+                              showSearchBox: true,
+                              searchFieldProps: TextFieldProps(
+                                decoration: InputDecoration(
+                                  hintText: "Search User...",
+                                  prefixIcon: const Icon(Icons.search),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                              itemBuilder: (context, user, isSelected) {
+                                return ListTile(
+                                  title: Text(
+                                    "${user['first_name']} ${user['last_name']}",
+                                  ),
+                                  leading: const Icon(Icons.person),
+                                  selected: isSelected,
+                                );
+                              },
+                            ),
+                            selectedItem: _selectedUserId != null
+                                ? _assignedUsers.firstWhere(
+                                    (u) => u['user_id'] == _selectedUserId,
+                                    orElse: () => {},
+                                  )
+                                : null,
+                            onChanged: (user) {
+                              setState(() {
+                                _selectedUserId = user?['user_id'] as int?;
+                                // You can trigger a filter function here too.
+                              });
+                            },
+                            compareFn: (a, b) => a['user_id'] == b['user_id'],
+                          ),
+                        ),
+                      ),
                     ),
-
-      // ➕ Floating Add Button
+                    // Tasks list
+                    Expanded(
+                      child: _tasks.isEmpty
+                          ? const Center(child: Text('No tasks found'))
+                          : ListView.builder(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              itemCount: _tasks.length,
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 20),
+                                  child: _buildTaskCard(_tasks[index]),
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blueAccent,
         foregroundColor: Colors.white,
@@ -290,7 +397,7 @@ class _TaskListPageState extends State<EmployeesTasksPage> {
             MaterialPageRoute(builder: (context) => AddTaskPage()),
           );
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
         tooltip: 'Add Task',
       ),
     );
