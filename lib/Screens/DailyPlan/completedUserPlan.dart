@@ -6,14 +6,14 @@ import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class DailyPlanPageForAdmin extends StatefulWidget {
-  const DailyPlanPageForAdmin({super.key});
+class CompleteDailyPlan extends StatefulWidget {
+  const CompleteDailyPlan({super.key});
 
   @override
-  State<DailyPlanPageForAdmin> createState() => _DailyPlanPageForAdminState();
+  State<CompleteDailyPlan> createState() => _DailyPlanPageForAdminState();
 }
 
-class _DailyPlanPageForAdminState extends State<DailyPlanPageForAdmin> {
+class _DailyPlanPageForAdminState extends State<CompleteDailyPlan> {
   DateTime _selectedDate = DateTime.now();
   final TextEditingController _searchController = TextEditingController();
   List<Map<String, dynamic>> _assignedUsers = [];

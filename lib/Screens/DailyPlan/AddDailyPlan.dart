@@ -16,16 +16,16 @@ class _AddDailyPlanPageState extends State<AddDailyPlanPage> {
   final _formKey = GlobalKey<FormState>();
   final _planNameController = TextEditingController();
 
-  final List<String> _users = ['Alice', 'Bob', 'Charlie'];
-  final List<String> _statuses = ['Not Started', 'In Progress', 'Completed'];
-  final List<String> _priorities = ['Low', 'Medium', 'High'];
-  final List<String> _planTypes = ['Development', 'Testing', 'Research'];
+  final TextEditingController _location = TextEditingController();
+
   List<Map<String, dynamic>> _assignedUsers = [];
   int? _selectedUserId;
   List<Map<String, dynamic>> _priorityList = [];
   int? _selectedPriorityId;
   List<Map<String, dynamic>> _planTypeList = [];
   int? _selectedPlanTypeId;
+  List<Map<String, dynamic>> _customer = [];
+  int? _selectedCustomer;
   List<Map<String, dynamic>> _taskStatusList = [];
 
   String? _selectedUser, _selectedStatus, _selectedPriority, _selectedPlanType;
@@ -37,6 +37,7 @@ class _AddDailyPlanPageState extends State<AddDailyPlanPage> {
     {'id': 2, 'label': 'Not Done'},
     {'id': 3, 'label': 'Done'},
   ];
+
   @override
   void initState() {
     super.initState();
@@ -44,6 +45,13 @@ class _AddDailyPlanPageState extends State<AddDailyPlanPage> {
     _loadUsers();
     _loadPriorities();
     _loadTaskStatuses();
+    _loadCustomer();
+  }
+
+  @override
+  void dispose() {
+    _location.dispose();
+    super.dispose();
   }
 
   Future<void> _loadUsers() async {
@@ -76,6 +84,17 @@ class _AddDailyPlanPageState extends State<AddDailyPlanPage> {
       });
     } catch (e) {
       print('Error loading plan type: $e');
+    }
+  }
+
+  Future<void> _loadCustomer() async {
+    try {
+      final customer = await ApiCalls.fetchCustomer();
+      setState(() {
+        _customer = customer;
+      });
+    } catch (e) {
+      print('Error loading customer: $e');
     }
   }
 
@@ -112,6 +131,8 @@ class _AddDailyPlanPageState extends State<AddDailyPlanPage> {
         final result = await ApiCalls.addDailyPlan(
           taskId: widget.taskId ?? 0, // Ensure it's not null
           userId: _selectedUserId ?? 0,
+          customerId: _selectedCustomer ?? 0,
+          location: _location.text,
           planName: _planNameController.text.trim(),
           planDate: DateFormat('yyyy-MM-dd').format(_selectedDate!),
           statusId: _selectedTaskStatusId ?? 0,
@@ -287,6 +308,51 @@ class _AddDailyPlanPageState extends State<AddDailyPlanPage> {
                       ),
                     ),
                   ),
+                ),
+                const SizedBox(height: 16),
+                DropdownSearch<Map<String, dynamic>>(
+                  items: _customer,
+                  itemAsString: (customer) => "${customer['company_name']}",
+                  dropdownDecoratorProps: DropDownDecoratorProps(
+                    dropdownSearchDecoration: _inputDecoration(
+                      "Select Customer",
+                      icon: Icons.person_outline,
+                    ),
+                  ),
+                  popupProps: PopupProps.menu(
+                    showSearchBox: true,
+                    searchFieldProps: TextFieldProps(
+                      decoration: _inputDecoration("Search Customer",
+                          icon: Icons.search),
+                    ),
+                    itemBuilder: (context, customer, isSelected) => ListTile(
+                      title: Text("${customer['company_name']}"),
+                      leading: const Icon(Icons.person),
+                    ),
+                  ),
+                  selectedItem: _selectedCustomer != null
+                      ? _customer.firstWhere(
+                          (u) => u['customer_id'] == _selectedCustomer,
+                          orElse: () => {})
+                      : null,
+                  onChanged: (customer) {
+                    setState(() {
+                      _selectedCustomer = customer?['customer_id'];
+                      _location.text = customer?['gps_location'] ?? '';
+                    });
+                  },
+                  compareFn: (a, b) => a['customer_id'] == b['customer_id'],
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _location,
+                  decoration: _inputDecoration('Location',
+                      icon: Icons.edit_note_outlined),
+                  validator: (val) =>
+                      val!.trim().isEmpty ? 'Please enter a location' : null,
+                  maxLines: null,
+                  minLines: 2,
+                  keyboardType: TextInputType.multiline,
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<int>(

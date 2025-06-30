@@ -15,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ApiCalls {
   //static String baseurl = "https://portalwiz.net/laravelapi/public/api/";
   static String basestorage = "https://portalwiz.net/laravelapi/storage/app/";
-  static String baseurl = "https://ecomed-test.portalwiz.in/api/public/api/";
+  static String baseurl = "https://ecomed-dev.portalwiz.in/api/public/api/";
   //baseurl = https://portalwiz.net/laravelapi/public/api/
   //basestorage = https://portalwiz.net/laravelapi/storage/app/
   // devurl = https://pw-bms-dev.portalwiz.in
@@ -998,6 +998,8 @@ class ApiCalls {
   static Future<Map<String, dynamic>> addDailyPlan({
     required int taskId,
     required int userId,
+    required int customerId,
+    required String location,
     required String planName,
     required String planDate,
     required int statusId,
@@ -1012,6 +1014,8 @@ class ApiCalls {
     final Map<String, dynamic> requestBody = {
       "task_id": taskId,
       "user_id": userId,
+      "customer_id": customerId,
+      "gps_location": location,
       "plan_name": planName,
       "achievements": achievements,
       "comments": comments,
@@ -1219,6 +1223,28 @@ class ApiCalls {
       return (jsonData as List).map((json) => Enquiry.fromJson(json)).toList();
     } else {
       throw Exception('Failed to fetch enquiries');
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> fetchCustomer() async {
+    final url = Uri.parse('${baseurl}customer_dropdown');
+    print('Request URL: $url');
+
+    try {
+      final response = await http.get(url);
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        final List<dynamic> data = jsonResponse['data'];
+        return data.cast<Map<String, dynamic>>();
+      } else {
+        throw Exception('Failed to load customers');
+      }
+    } catch (e) {
+      print('Error fetching customers: $e');
+      throw Exception('Error fetching customers: $e');
     }
   }
 }
