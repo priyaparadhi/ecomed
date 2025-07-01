@@ -31,6 +31,8 @@ class _AddDailyPlanPageState extends State<AddDailyPlanPage> {
   String? _selectedUser, _selectedStatus, _selectedPriority, _selectedPlanType;
   DateTime? _selectedDate;
   int? _selectedTaskStatusId;
+  DateTime? _startDate;
+  DateTime? _endDate;
 
   final List<Map<String, dynamic>> taskStatusOptions = [
     {'id': 1, 'label': 'Pending'},
@@ -109,20 +111,44 @@ class _AddDailyPlanPageState extends State<AddDailyPlanPage> {
     }
   }
 
-  Future<void> _pickDate() async {
+  // Future<void> _pickDate() async {
+  //   final picked = await showDatePicker(
+  //     context: context,
+  //     initialDate: _selectedDate ?? DateTime.now(),
+  //     firstDate: DateTime.now().subtract(const Duration(days: 1)),
+  //     lastDate: DateTime.now().add(const Duration(days: 365)),
+  //     builder: (context, child) => Theme(
+  //       data: ThemeData.light().copyWith(
+  //         colorScheme: const ColorScheme.light(primary: Colors.blueAccent),
+  //       ),
+  //       child: child!,
+  //     ),
+  //   );
+  //   if (picked != null) setState(() => _selectedDate = picked);
+  // }
+
+  Future<void> _pickStartDate() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime.now().subtract(const Duration(days: 1)),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-      builder: (context, child) => Theme(
-        data: ThemeData.light().copyWith(
-          colorScheme: const ColorScheme.light(primary: Colors.blueAccent),
-        ),
-        child: child!,
-      ),
+      initialDate: _startDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
     );
-    if (picked != null) setState(() => _selectedDate = picked);
+    if (picked != null) {
+      setState(() => _startDate = picked);
+    }
+  }
+
+  Future<void> _pickEndDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _endDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() => _endDate = picked);
+    }
   }
 
   Future<void> _submitDailyPlan() async {
@@ -134,7 +160,8 @@ class _AddDailyPlanPageState extends State<AddDailyPlanPage> {
           customerId: _selectedCustomer ?? 0,
           location: _location.text,
           planName: _planNameController.text.trim(),
-          planDate: DateFormat('yyyy-MM-dd').format(_selectedDate!),
+          startDate: DateFormat('yyyy-MM-dd').format(_startDate!),
+          endDate: DateFormat('yyyy-MM-dd').format(_endDate!),
           statusId: _selectedTaskStatusId ?? 0,
           priorityId: _selectedPriorityId ?? 0,
           planTypeId: _selectedPlanTypeId ?? 0,
@@ -291,24 +318,62 @@ class _AddDailyPlanPageState extends State<AddDailyPlanPage> {
                 ),
                 const SizedBox(height: 16),
                 InkWell(
-                  onTap: _pickDate,
+                  onTap: _pickStartDate,
                   borderRadius: BorderRadius.circular(12),
                   child: InputDecorator(
-                    decoration: _inputDecoration('Pick Date',
-                        icon: Icons.calendar_today_outlined),
+                    decoration:
+                        _inputDecoration('Start Date', icon: Icons.date_range),
                     child: Text(
-                      _selectedDate != null
-                          ? DateFormat('yyyy-MM-dd').format(_selectedDate!)
-                          : 'Tap to pick a date',
+                      _startDate != null
+                          ? DateFormat('yyyy-MM-dd').format(_startDate!)
+                          : 'Tap to pick a start date',
                       style: TextStyle(
                         fontSize: 14,
-                        color: _selectedDate == null
-                            ? Colors.grey
-                            : Colors.black87,
+                        color:
+                            _startDate == null ? Colors.grey : Colors.black87,
                       ),
                     ),
                   ),
                 ),
+                const SizedBox(height: 16),
+                InkWell(
+                  onTap: _pickEndDate,
+                  borderRadius: BorderRadius.circular(12),
+                  child: InputDecorator(
+                    decoration:
+                        _inputDecoration('End Date', icon: Icons.date_range),
+                    child: Text(
+                      _endDate != null
+                          ? DateFormat('yyyy-MM-dd').format(_endDate!)
+                          : 'Tap to pick an end date',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: _endDate == null ? Colors.grey : Colors.black87,
+                      ),
+                    ),
+                  ),
+                ),
+
+                // const SizedBox(height: 16),
+                // InkWell(
+                //   onTap: _pickDate,
+                //   borderRadius: BorderRadius.circular(12),
+                //   child: InputDecorator(
+                //     decoration: _inputDecoration('Pick Date',
+                //         icon: Icons.calendar_today_outlined),
+                //     child: Text(
+                //       _selectedDate != null
+                //           ? DateFormat('yyyy-MM-dd').format(_selectedDate!)
+                //           : 'Tap to pick a date',
+                //       style: TextStyle(
+                //         fontSize: 14,
+                //         color: _selectedDate == null
+                //             ? Colors.grey
+                //             : Colors.black87,
+                //       ),
+                //     ),
+                //   ),
+                // ),
                 const SizedBox(height: 16),
                 DropdownSearch<Map<String, dynamic>>(
                   items: _customer,

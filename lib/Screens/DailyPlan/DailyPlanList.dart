@@ -2,6 +2,8 @@ import 'package:ecomed/ApiCalls/ApiCalls.dart';
 import 'package:ecomed/Models/DailyPlanModel.dart';
 import 'package:flutter/material.dart';
 import 'package:date_picker_timeline/date_picker_timeline.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -286,14 +288,87 @@ class _DailyPlanPageState extends State<DailyPlanPage> {
                                     ],
                                   ),
                                   const SizedBox(height: 12),
-                                  _buildDetailRow("Plan", plan.planName),
                                   _buildDetailRow(
-                                      "Task", plan.taskName ?? 'N/A'),
+                                      "Task Name", plan.taskName ?? 'N/A'),
+                                  _buildDetailRow("Plan", plan.planName),
+
                                   _buildDetailRow(
                                       "Comment", plan.comments ?? 'N/A'),
+                                  _buildDetailRow(
+                                      "Location", plan.location ?? 'N/A'),
+
                                   const SizedBox(height: 10),
                                   GestureDetector(
-                                    onTap: () => _showAchievementDialog(index),
+                                    onTap: () async {
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (_) => const AlertDialog(
+                                          content: Row(
+                                            children: [
+                                              CircularProgressIndicator(),
+                                              SizedBox(width: 16),
+                                              Expanded(
+                                                  child: Text(
+                                                      "Verifying location...")),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+
+                                      final currentPosition =
+                                          await _getCurrentLocation();
+                                      if (currentPosition == null) {
+                                        Navigator.pop(
+                                            context); // Close the loader
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                              content: Text(
+                                                  "Location not available.")),
+                                        );
+                                        return;
+                                      }
+
+                                      final planLatLng =
+                                          await _getLatLngFromAddress(
+                                              plan.location ?? 'N/A');
+                                      if (planLatLng == null) {
+                                        Navigator.pop(
+                                            context); // Close the loader
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                              content: Text(
+                                                  "Unable to resolve plan location.")),
+                                        );
+                                        return;
+                                      }
+
+                                      final distanceInMeters =
+                                          Geolocator.distanceBetween(
+                                        currentPosition.latitude,
+                                        currentPosition.longitude,
+                                        planLatLng.latitude,
+                                        planLatLng.longitude,
+                                      );
+
+                                      Navigator.pop(
+                                          context); // Close the loader
+
+                                      if (distanceInMeters <= 100) {
+                                        _showAchievementDialog(
+                                            index); // ✅ Allow editing
+                                      } else {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                "You are not within 100 meters of the plan location."),
+                                          ),
+                                        );
+                                      }
+                                    },
                                     child: Container(
                                       padding: const EdgeInsets.all(10),
                                       decoration: BoxDecoration(
@@ -348,4 +423,41 @@ class _DailyPlanPageState extends State<DailyPlanPage> {
       ),
     );
   }
+}
+
+Future<Position?> _getCurrentLocation() async {
+  bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    await Geolocator.openLocationSettings();
+    return null;
+  }
+
+  LocationPermission permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      return null;
+    }
+  }
+
+  return await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high);
+}
+
+Future<LatLng?> _getLatLngFromAddress(String address) async {
+  try {
+    final locations = await locationFromAddress(address);
+    if (locations.isNotEmpty) {
+      return LatLng(locations.first.latitude, locations.first.longitude);
+    }
+  } catch (e) {
+    debugPrint("Geocoding failed: $e");
+  }
+  return null;
+}
+
+class LatLng {
+  final double latitude;
+  final double longitude;
+  LatLng(this.latitude, this.longitude);
 }

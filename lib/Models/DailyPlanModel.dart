@@ -12,6 +12,7 @@ class DailyPlan {
   final String? status;
   final String? priority;
   int statusId;
+  final String? location;
   DailyPlan({
     required this.planId,
     required this.userId,
@@ -24,6 +25,7 @@ class DailyPlan {
     this.status,
     this.priority,
     required this.statusId,
+    required this.location,
   });
 
   factory DailyPlan.fromJson(Map<String, dynamic> json) {
@@ -39,6 +41,7 @@ class DailyPlan {
       status: json['status'], // If you start receiving status from API
       priority: json['priority_name'],
       statusId: json['status_id'] ?? 0,
+      location: json['gps_location'] ?? '',
     );
   }
 }
