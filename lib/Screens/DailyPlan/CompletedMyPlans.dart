@@ -36,7 +36,7 @@ class _DailyPlanPageState extends State<CompletedDailyPlanPage> {
         planDate: formattedDate,
         userId: userId,
         userFilter: null,
-        statusId: null,
+        statusId: 3,
       );
 
       setState(() => _plans = fetchedPlans);

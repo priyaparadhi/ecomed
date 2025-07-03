@@ -10,6 +10,7 @@ import 'package:ecomed/Screens/EmployeeLeave/LeaveTracker.dart';
 import 'package:ecomed/Screens/DashBoardScreen.dart';
 import 'package:ecomed/Screens/Enquiry/Enquiries.dart';
 import 'package:ecomed/Screens/Event/EventCalender.dart';
+import 'package:ecomed/Screens/Expense/AddExpense.dart';
 import 'package:ecomed/Screens/UserDashboardScreen.dart';
 import 'package:ecomed/styles/styles.dart';
 import 'package:flutter/material.dart';
@@ -422,6 +423,29 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                 ),
               ),
             ],
+          ),
+          ListTile(
+            title: const Text(
+              "Expense",
+              style: TextStyle(fontSize: 15),
+            ),
+            leading: const Icon(
+              Icons.question_answer_outlined,
+              color: Colors.lightBlue,
+              size: 20,
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              // Navigator.push(context,
+              //     MaterialPageRoute(builder: (context) => MyEnquire()));
+
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => ExpenseClaimPage()),
+                (Route<dynamic> route) =>
+                    route.settings.name == '/HomeScreen' || route.isFirst,
+              );
+            },
           ),
 
           // Visibility(

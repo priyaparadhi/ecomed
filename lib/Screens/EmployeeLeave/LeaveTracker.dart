@@ -1,4 +1,6 @@
 import 'package:ecomed/ApiCalls/ApiCalls.dart';
+import 'package:ecomed/Models/LeaveModel.dart';
+import 'package:ecomed/Models/WFHModel.dart';
 import 'package:ecomed/Screens/EmployeeLeave/LeaveForm.dart';
 import 'package:ecomed/Screens/EmployeeLeave/WfhForm.dart';
 import 'package:ecomed/Screens/EmployeeLeave/leavehistory.dart';
@@ -24,45 +26,6 @@ class LeaveTracker extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: Colors.white,
           title: Text('Leave Tracker', style: GoogleFonts.lato()),
-          //         actions: [
-          //          PopupMenuButton<String>(
-          // onSelected: (String value) {
-          //   if (value == 'Leave History') {
-          //     Navigator.push(
-          //       context,
-          //       MaterialPageRoute(builder: (context) => LeaveHistorySection()),
-          //     );
-          //   } else {
-          //     print('Selected: $value');
-          //   }
-          // },
-          // itemBuilder: (BuildContext context) {
-          //   return [
-          //     // PopupMenuItem<String>(
-          //     //   value: 'Casual Leaves',
-          //     //   child: Text('Casual Leaves'),
-          //     // ),
-          //     // PopupMenuItem<String>(
-          //     //   value: 'Sick Leaves',
-          //     //   child: Text('Sick Leaves'),
-          //     // ),
-          //     // PopupMenuItem<String>(
-          //     //   value: 'Elective Leaves',
-          //     //   child: Text('Elective Leaves'),
-          //     // ),
-          //     // PopupMenuItem<String>(
-          //     //   value: 'WFH Requests',
-          //     //   child: Text('WFH Requests'),
-          //     // ),
-          //     PopupMenuItem<String>(
-          //       value: 'Leave History',
-          //       child: Text('Leave History'),
-          //     ),
-          //   ];
-          // },
-          //  icon: const Icon(Icons.more_vert), // Three-dot vertical icon/ ),
-          //          ),
-          //    ],
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(kToolbarHeight),
             child: Stack(
@@ -174,7 +137,7 @@ class _LeaveSectionState extends State<LeaveSection> {
         futureSickLeaves = ApiCalls.fetchSickLeaves();
         futureElectiveLeaves = ApiCalls.fetchElectiveLeaves();
         futureLeaveHistory = ApiCalls.fetchSingleEmployeeLeave();
-        futureWfhHistory = ApiCalls.fetchSingleEmployeeWFH();
+        //futureWfhHistory = ApiCalls.fetchSingleEmployeeWFH();
       });
 
       // ✅ Call the API with the integer values
@@ -300,7 +263,7 @@ class _LeaveSectionState extends State<LeaveSection> {
                 const SizedBox(height: 16),
                 LeaveHistorySection(
                   futureLeaveHistory: futureLeaveHistory ?? Future.value([]),
-                  futureWfhHistory: futureWfhHistory ?? Future.value([]),
+                  //futureWfhHistory: futureWfhHistory ?? Future.value([]),
                 ),
               ],
             ),
@@ -753,38 +716,6 @@ class LeaveCard extends StatelessWidget {
   }
 }
 
-class LeaveHistory {
-  final int leaveId;
-  final String leaveName;
-  final String dateFrom;
-  final String dateTo;
-  final double noOfDays;
-  final String status;
-  final String? comment;
-
-  LeaveHistory({
-    required this.leaveId,
-    required this.leaveName,
-    required this.dateFrom,
-    required this.dateTo,
-    required this.noOfDays,
-    required this.status,
-    this.comment,
-  });
-
-  factory LeaveHistory.fromJson(Map<String, dynamic> json) {
-    return LeaveHistory(
-      leaveId: json['leave_id'],
-      leaveName: json['request_type'],
-      dateFrom: json['date_from'],
-      dateTo: json['date_to'],
-      noOfDays: double.parse(json['no_of_days']),
-      status: json['status'] ?? 'Pending',
-      comment: json['reason'],
-    );
-  }
-}
-
 // class WfhHistorySection extends StatefulWidget {
 //   @override
 //   _WfhHistorySectionState createState() => _WfhHistorySectionState();
@@ -837,37 +768,4 @@ class LeaveHistory {
 //   }
 // }
 
-class WfhHistory {
-  final int wfhId;
-  final double noOfDays;
-  final String dateFrom;
-  final String dateTo;
-  final int wfhStatus;
-  final String? comment;
-  final String createdAt;
-  final String status;
 
-  WfhHistory({
-    required this.wfhId,
-    required this.noOfDays,
-    required this.dateFrom,
-    required this.dateTo,
-    required this.wfhStatus,
-    required this.comment,
-    required this.createdAt,
-    required this.status,
-  });
-
-  factory WfhHistory.fromJson(Map<String, dynamic> json) {
-    return WfhHistory(
-      wfhId: json['wfh_id'],
-      noOfDays: double.parse(json['no_of_days']),
-      dateFrom: json['date_from'],
-      dateTo: json['date_to'],
-      wfhStatus: json['wfh_status'],
-      comment: json['reason'],
-      createdAt: json['created_at'],
-      status: json['status'] ?? 'Pending',
-    );
-  }
-}

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:ecomed/ApiCalls/ApiCalls.dart';
 import 'package:ecomed/styles/styles.dart';
 import 'package:flutter/material.dart';
@@ -14,12 +16,14 @@ class LeaveForm extends StatefulWidget {
 
 class _LeaveFormState extends State<LeaveForm> {
   String? _selectedLeaveType;
+  String? _selectedRequestType;
   DateTime _fromDate = DateTime.now();
   DateTime _toDate = DateTime.now();
   DateTime _returnDate = DateTime.now();
   String _reason = '';
   String _employeeName = '';
   List<Map<String, dynamic>> _leaveTypes = [];
+  List<Map<String, dynamic>> _requestTypes = [];
 
   String? _filePath;
   bool _isSubmitting = false;
@@ -35,9 +39,22 @@ class _LeaveFormState extends State<LeaveForm> {
 
   @override
   void initState() {
+    _fetchRequestTypes();
     _fetchLeaveTypes();
     // TODO: implement initState
     super.initState();
+  }
+
+  void _fetchRequestTypes() async {
+    try {
+      List<Map<String, dynamic>> requestTypes =
+          await ApiCalls.fetchRequestTypes();
+      setState(() {
+        _requestTypes = requestTypes;
+      });
+    } catch (e) {
+      print('Failed to fetch req types: $e');
+    }
   }
 
   void _fetchLeaveTypes() async {
@@ -61,18 +78,17 @@ class _LeaveFormState extends State<LeaveForm> {
       int? employeeId = prefs.getInt('employee_id');
       int? userIdStr = prefs.getInt('user_id');
 
-      // if (employeeIdStr == null || userIdStr == null) {
-      //   throw Exception(
-      //       'Employee ID or User ID not found in SharedPreferences');
-      // }
-
-      // final int employeeId = int.parse(employeeIdStr);
-
-      final noOfDays = _returnDate.difference(_fromDate).inDays;
+      double noOfDays;
+      if (_selectedRequestType == '7') {
+        noOfDays = 0.5;
+      } else {
+        noOfDays = _returnDate.difference(_fromDate).inDays.toDouble();
+      }
 
       Map<String, dynamic> data = {
         "employee_id": employeeId,
-        "request_type_id": int.parse(_selectedLeaveType!),
+        "leave_type_id": int.parse(_selectedLeaveType ?? ''),
+        "request_type_id": int.parse(_selectedRequestType ?? ''),
         "no_of_days": noOfDays.toDouble(),
         "reason": _reason,
         "date_from":
@@ -91,12 +107,21 @@ class _LeaveFormState extends State<LeaveForm> {
 
       var response = await ApiCalls.applyLeave(data);
 
+      final message =
+          response['message'] ?? 'Leave request submitted successfully.';
+      final warning = response['warning'];
+
+      String finalMessage = warning != null && warning.toString().isNotEmpty
+          ? '$message\n⚠️ $warning'
+          : message;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${response}'),
+          content: Text(finalMessage),
           backgroundColor: Colors.green,
         ),
       );
+
       setState(() {
         _selectedLeaveType;
         _fromDate = DateTime.now();
@@ -188,8 +213,8 @@ class _LeaveFormState extends State<LeaveForm> {
                     ),
                     items: _leaveTypes.map((leaveType) {
                       return DropdownMenuItem<String>(
-                        value: leaveType['request_type_id'].toString(),
-                        child: Text(leaveType['request_type']),
+                        value: leaveType['leave_type_id'].toString(),
+                        child: Text(leaveType['leave_type']),
                       );
                     }).toList(),
                     onChanged: (String? newValue) {
@@ -197,6 +222,38 @@ class _LeaveFormState extends State<LeaveForm> {
                         _selectedLeaveType = newValue;
                       });
                       print("Selected Leave Type: $_selectedLeaveType");
+                    },
+                  ),
+                  SizedBox(height: 16.0),
+                  Text(
+                    'Request Type:',
+                    style: GoogleFonts.lato(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    value: _selectedRequestType,
+                    decoration: InputDecoration(
+                      labelText: 'Select Request Type',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                    ),
+                    items: _requestTypes.map((leaveType) {
+                      return DropdownMenuItem<String>(
+                        value: leaveType['request_type_id'].toString(),
+                        child: Text(leaveType['request_type']),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedRequestType = newValue;
+                      });
+                      print("Selected Leave Type: $_selectedRequestType");
                     },
                   ),
                   SizedBox(

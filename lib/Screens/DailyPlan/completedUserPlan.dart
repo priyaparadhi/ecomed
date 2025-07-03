@@ -70,7 +70,7 @@ class _DailyPlanPageForAdminState extends State<CompleteDailyPlan> {
         planDate: formattedDate,
         userId: userId,
         userFilter: _selectedUserId,
-        statusId: _selectedTaskStatusId,
+        statusId: 3,
       );
 
       setState(() {

@@ -4,8 +4,11 @@ import 'package:ecomed/Models/CompaniesModel.dart';
 import 'package:ecomed/Models/ContactModel.dart';
 import 'package:ecomed/Models/DailyPlanModel.dart';
 import 'package:ecomed/Models/EnquiryModel.dart';
+import 'package:ecomed/Models/EventModel.dart';
+import 'package:ecomed/Models/LeaveModel.dart';
 import 'package:ecomed/Models/TaskModel.dart';
 import 'package:ecomed/Models/Timesheetmodel.dart';
+import 'package:ecomed/Models/WFHModel.dart';
 import 'package:ecomed/Screens/EmployeeLeave/LeaveTracker.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -51,12 +54,15 @@ class ApiCalls {
     }
   }
 
-  static Future<List<Map<String, dynamic>>> fetchLeaveTypes() async {
-    final response = await http.get(Uri.parse(
-        '${baseurl}fetch_leave_type')); // Replace with your actual API endpoint
+  static Future<List<Map<String, dynamic>>> fetchRequestTypes() async {
+    final response =
+        await http.get(Uri.parse('${baseurl}request_type_dropdown'));
 
     if (response.statusCode == 200) {
-      final List<dynamic> leaveTypes = json.decode(response.body);
+      final Map<String, dynamic> data = json.decode(response.body);
+      final List<dynamic> leaveTypes =
+          data['message']; // Extract from 'message'
+
       return leaveTypes.map((leave) {
         return {
           'request_type_id': leave['request_type_id'],
@@ -233,25 +239,28 @@ class ApiCalls {
   static Future<List<LeaveHistory>> fetchSingleEmployeeLeave() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      // String? employeeId = prefs.getString('employee_id');
 
-      // if (employeeId == null) {
-      //   throw Exception('Employee ID not found in SharedPreferences');
-      // }
+      final requestBody = {
+        'account_id': '${prefs.getInt("account_id")}',
+        'employee_id': '${prefs.getInt("employee_id")}',
+      };
+
+      print('Request Body: ${jsonEncode(requestBody)}');
 
       final response = await http.post(
         Uri.parse('${baseurl}fetch_single_employee_leave'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(<String, dynamic>{
-          'account_id': '${prefs.getInt("account_id")}',
-          'employee_id': '${prefs.getInt("employee_id")}',
-        }),
+        body: jsonEncode(requestBody),
       );
+
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
 
       if (response.statusCode == 200) {
         List jsonResponse = json.decode(response.body);
+
         List<String> requestTypeIds = [];
         for (var leave in jsonResponse) {
           requestTypeIds.add(leave['request_type_id'].toString());
@@ -265,6 +274,7 @@ class ApiCalls {
         throw Exception('Failed to load leave history');
       }
     } catch (e) {
+      print('Error: $e');
       throw Exception('Failed to load leave history: $e');
     }
   }
@@ -1247,6 +1257,135 @@ class ApiCalls {
     } catch (e) {
       print('Error fetching customers: $e');
       throw Exception('Error fetching customers: $e');
+    }
+  }
+
+  static Future<List<AttendanceRecord>> fetchMyAttendence({
+    required String date,
+  }) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int? userId = prefs.getInt("user_id");
+    final url = Uri.parse('${baseurl}fetch_all_attendance');
+
+    final Map<String, dynamic> requestBody = {
+      'user_id': userId, // Will be null if not selected
+      'date': date, // Format: 'yyyy-MM-dd'
+    };
+
+    print("🔵 Request Body: ${jsonEncode(requestBody)}");
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(requestBody),
+    );
+
+    print("🟢 Response Status Code: ${response.statusCode}");
+    print("🟢 Response Body: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+      return data.map((e) => AttendanceRecord.fromJson(e)).toList();
+    } else {
+      throw Exception('❌ Failed to load attendance: ${response.body}');
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> fetchLeaveTypes() async {
+    final response = await http.get(Uri.parse(
+        '${baseurl}leave_type_dropdown')); // Replace with your actual API endpoint
+
+    if (response.statusCode == 200) {
+      final List<dynamic> leaveTypes = json.decode(response.body);
+      return leaveTypes.map((leave) {
+        return {
+          'leave_type_id': leave['leave_type_id'],
+          'leave_type': leave['leave_type'],
+        };
+      }).toList();
+    } else {
+      throw Exception('Failed to fetch leave types');
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> fetchEventTypes() async {
+    final url = Uri.parse(
+        '${baseurl}event_type_dropdown'); // Replace with actual API URL
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(response.body);
+      if (decoded['success']) {
+        return List<Map<String, dynamic>>.from(decoded['data']);
+      } else {
+        throw Exception('Failed to load event types');
+      }
+    } else {
+      throw Exception('Failed to load event types');
+    }
+  }
+
+  static Future<Map<String, dynamic>> addEvent({
+    required int eventTypeId,
+    required String eventTitle,
+    required String eventDescription,
+    required String eventDate,
+    required String eventTime,
+  }) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int? createdBy = prefs.getInt("user_id");
+    final response = await http.post(
+      Uri.parse('${baseurl}add_event'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        "event_type_id": eventTypeId,
+        "event_title": eventTitle,
+        "event_description": eventDescription,
+        "event_date": eventDate,
+        "event_time": eventTime,
+        "created_by": createdBy,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception("Failed to add event");
+    }
+  }
+
+  static Future<List<Event>> fetchEvents({
+    required int month,
+    required int year,
+  }) async {
+    final url = Uri.parse('${baseurl}fetch_events');
+    final requestBody = {'month': month, 'year': year};
+
+    print('📤 Request URL: $url');
+    print('📤 Request Body: ${jsonEncode(requestBody)}');
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(requestBody),
+    );
+
+    print('📥 Response Status Code: ${response.statusCode}');
+    print('📥 Response Body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
+      if (body['success']) {
+        List<Event> events = (body['data'] as List)
+            .map((event) => Event.fromJson(event))
+            .toList();
+        return events;
+      } else {
+        throw Exception('Failed to load events: ${body['message']}');
+      }
+    } else {
+      throw Exception('Server error ${response.statusCode}');
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:ecomed/Screens/Attendence/MyAttendence.dart';
 import 'package:ecomed/Screens/DailyPlan/CompletedMyPlans.dart';
 import 'package:ecomed/Screens/DailyPlan/DailyPlanList.dart';
 import 'package:ecomed/Screens/EmployeeLeave/LeaveTracker.dart';
@@ -681,7 +682,13 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                     title: 'Attendance',
                     count: 22,
                     icon: LucideIcons.userCheck,
-                    color: Colors.indigo),
+                    color: Colors.indigo,
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MyAttendanceHistoryPage()));
+                    }),
                 UserStatCard(
                     title: 'Leaves',
                     count: 2,

@@ -1,12 +1,5 @@
+import 'package:ecomed/ApiCalls/ApiCalls.dart';
 import 'package:flutter/material.dart';
-
-class Event {
-  final String title;
-  final String type;
-  final String time;
-
-  Event({required this.title, required this.type, required this.time});
-}
 
 class AddEventPage extends StatefulWidget {
   final DateTime selectedDate;
@@ -19,32 +12,76 @@ class AddEventPage extends StatefulWidget {
 
 class _AddEventPageState extends State<AddEventPage> {
   final _formKey = GlobalKey<FormState>();
-  String _title = '';
+  final TextEditingController eventTitle = TextEditingController();
+  final TextEditingController eventDescription = TextEditingController();
   String _type = 'meeting';
   TimeOfDay? _time;
   DateTime? _eventDate;
-
-  final List<String> _types = ['birthday', 'meeting', 'other'];
+  List<Map<String, dynamic>> _eventTypes = [];
+  int? _selectedEventTypeId;
 
   @override
   void initState() {
     super.initState();
+    _loadEventTypes();
     _eventDate = widget.selectedDate;
   }
 
-  void _submit() {
+  void _submit() async {
     if (_formKey.currentState!.validate() &&
         _time != null &&
-        _eventDate != null) {
+        _eventDate != null &&
+        _selectedEventTypeId != null) {
       _formKey.currentState!.save();
+
       final formattedTime =
-          '${_time!.hour.toString().padLeft(2, '0')}:${_time!.minute.toString().padLeft(2, '0')}';
-      final newEvent = Event(title: _title, type: _type, time: formattedTime);
-      Navigator.pop(context, {'event': newEvent, 'date': _eventDate});
+          '${_time!.hour.toString().padLeft(2, '0')}:${_time!.minute.toString().padLeft(2, '0')}:00';
+      final formattedDate =
+          '${_eventDate!.year}-${_eventDate!.month.toString().padLeft(2, '0')}-${_eventDate!.day.toString().padLeft(2, '0')}';
+
+      try {
+        final response = await ApiCalls.addEvent(
+          eventTypeId: _selectedEventTypeId!,
+          eventTitle: eventTitle.text.trim(),
+          eventDescription: eventDescription.text.trim(),
+          eventDate: formattedDate,
+          eventTime: formattedTime,
+        );
+
+        if (response['success']) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(response['message'])),
+          );
+          Navigator.pop(context, true);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(response['message'] ?? 'Failed to add event')),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: ${e.toString()}")),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please complete all fields")),
       );
+    }
+  }
+
+  void _loadEventTypes() async {
+    try {
+      final types = await ApiCalls.fetchEventTypes();
+      setState(() {
+        _eventTypes = types;
+        if (_eventTypes.isNotEmpty) {
+          _selectedEventTypeId = _eventTypes.first['event_type_id'];
+        }
+      });
+    } catch (e) {
+      print('Error loading event types: $e');
     }
   }
 
@@ -69,28 +106,28 @@ class _AddEventPageState extends State<AddEventPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: const Color(0xFFF2F5F9),
       appBar: AppBar(
         title: const Text("Add Event",
             style: TextStyle(fontWeight: FontWeight.w600)),
         backgroundColor: Colors.white,
-        elevation: 1,
+        elevation: 0.5,
         foregroundColor: Colors.black,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: const [
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
                 BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
+                  color: Colors.black12.withOpacity(0.05),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
                 ),
               ],
             ),
@@ -100,88 +137,68 @@ class _AddEventPageState extends State<AddEventPage> {
                 const Text(
                   "Event Details",
                   style: TextStyle(
-                    fontSize: 22,
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.indigo,
+                    color: Colors.blueAccent,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 30),
 
                 // Event Title
                 TextFormField(
-                  decoration: InputDecoration(
-                    labelText: "Event Title",
-                    prefixIcon: const Icon(Icons.title),
-                    filled: true,
-                    fillColor: Colors.grey.shade100,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  decoration: _inputDecoration("Event Title", Icons.title),
                   validator: (value) =>
                       value!.isEmpty ? 'Enter event title' : null,
-                  onSaved: (value) => _title = value!.trim(),
+                  onSaved: (value) => eventTitle.text = value!.trim(),
                 ),
+                const SizedBox(height: 24),
 
-                const SizedBox(height: 20),
-
-                // Event Type
-                DropdownButtonFormField<String>(
-                  value: _type,
-                  decoration: InputDecoration(
-                    labelText: "Event Type",
-                    prefixIcon: const Icon(Icons.category_outlined),
-                    filled: true,
-                    fillColor: Colors.grey.shade100,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  items: _types
-                      .map((type) => DropdownMenuItem(
-                            value: type,
-                            child: Text(type.toUpperCase()),
-                          ))
-                      .toList(),
-                  onChanged: (val) => setState(() => _type = val!),
+                // Event Description
+                TextFormField(
+                  decoration:
+                      _inputDecoration("Event Description", Icons.description),
+                  validator: (value) =>
+                      value!.isEmpty ? 'Enter event description' : null,
+                  onSaved: (value) => eventDescription.text = value!.trim(),
+                  maxLines: 5,
                 ),
+                const SizedBox(height: 24),
 
-                const SizedBox(height: 20),
+                // Event Type Dropdown
+                _eventTypes.isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : DropdownButtonFormField<int>(
+                        value: _selectedEventTypeId,
+                        decoration: _inputDecoration(
+                            "Event Type", Icons.category_outlined),
+                        items: _eventTypes.map((type) {
+                          return DropdownMenuItem<int>(
+                            value: type['event_type_id'],
+                            child: Text(type['event_type']),
+                          );
+                        }).toList(),
+                        onChanged: (val) =>
+                            setState(() => _selectedEventTypeId = val),
+                      ),
+
+                const SizedBox(height: 24),
 
                 // Date Picker
-                ListTile(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  tileColor: Colors.grey.shade100,
-                  leading: const Icon(Icons.calendar_today_outlined),
-                  title: Text(
-                    _eventDate == null
-                        ? 'Pick a date'
-                        : '${_eventDate!.day}-${_eventDate!.month}-${_eventDate!.year}',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  trailing: TextButton(
-                    onPressed: _pickDate,
-                    child: const Text("Select"),
-                  ),
+                _pickerTile(
+                  icon: Icons.calendar_today_outlined,
+                  label: _eventDate == null
+                      ? 'Pick a date'
+                      : '${_eventDate!.day}-${_eventDate!.month}-${_eventDate!.year}',
+                  onTap: _pickDate,
                 ),
 
                 const SizedBox(height: 16),
 
                 // Time Picker
-                ListTile(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  tileColor: Colors.grey.shade100,
-                  leading: const Icon(Icons.access_time_outlined),
-                  title: Text(
-                    _time == null ? 'Pick a time' : _time!.format(context),
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  trailing: TextButton(
-                    onPressed: _pickTime,
-                    child: const Text("Select"),
-                  ),
+                _pickerTile(
+                  icon: Icons.access_time_outlined,
+                  label: _time == null ? 'Pick a time' : _time!.format(context),
+                  onTap: _pickTime,
                 ),
 
                 const SizedBox(height: 32),
@@ -192,17 +209,16 @@ class _AddEventPageState extends State<AddEventPage> {
                   child: ElevatedButton.icon(
                     onPressed: _submit,
                     icon: const Icon(Icons.check_circle_outline),
-                    label: const Text(
-                      "Save Event",
-                      style: TextStyle(fontSize: 16),
-                    ),
+                    label: const Text("Save Event",
+                        style: TextStyle(fontSize: 16)),
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      backgroundColor: Colors.blueAccent,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: Colors.indigo,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14),
                       ),
+                      elevation: 3,
                     ),
                   ),
                 ),
@@ -210,6 +226,41 @@ class _AddEventPageState extends State<AddEventPage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon),
+      filled: true,
+      fillColor: Colors.grey.shade100,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Colors.indigo, width: 1.2),
+      ),
+      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 14),
+    );
+  }
+
+  Widget _pickerTile(
+      {required IconData icon,
+      required String label,
+      required VoidCallback onTap}) {
+    return ListTile(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      tileColor: Colors.grey.shade100,
+      leading: Icon(icon, color: Colors.indigo),
+      title: Text(label, style: const TextStyle(fontSize: 16)),
+      trailing: TextButton(
+        onPressed: onTap,
+        child:
+            const Text("Select", style: TextStyle(fontWeight: FontWeight.w500)),
       ),
     );
   }

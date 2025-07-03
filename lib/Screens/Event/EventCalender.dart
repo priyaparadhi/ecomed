@@ -1,15 +1,9 @@
+import 'package:ecomed/ApiCalls/ApiCalls.dart';
+import 'package:ecomed/Models/EventModel.dart';
 import 'package:ecomed/Screens/Event/AddEvent.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-class Event {
-  final String title;
-  final String type; // birthday, meeting, other
-  final String time;
-
-  Event({required this.title, required this.type, required this.time});
-}
 
 class EventCalendar extends StatefulWidget {
   const EventCalendar({Key? key}) : super(key: key);
@@ -19,21 +13,48 @@ class EventCalendar extends StatefulWidget {
 }
 
 class _EventCalendarState extends State<EventCalendar> {
-  final Map<DateTime, List<Event>> _events = {
-    DateTime.utc(2025, 6, 26): [
-      Event(title: "Priya's Birthday", type: "birthday", time: "All Day"),
-    ],
-    DateTime.utc(2025, 6, 27): [
-      Event(title: "Team Meeting", type: "meeting", time: "11:00 AM"),
-      Event(title: "Project Deadline", type: "other", time: "5:00 PM"),
-    ],
-  };
+  final Map<DateTime, List<Event>> _events = {};
 
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
   List<Event> _getEventsForDay(DateTime day) {
     return _events[DateTime.utc(day.year, day.month, day.day)] ?? [];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAndSetEvents(_focusedDay.month, _focusedDay.year);
+  }
+
+  Future<void> _fetchAndSetEvents(int month, int year) async {
+    try {
+      final fetchedEvents =
+          await ApiCalls.fetchEvents(month: month, year: year);
+      final Map<DateTime, List<Event>> eventMap = {};
+
+      for (var event in fetchedEvents) {
+        DateTime parsedDate = DateTime.parse(event.date);
+        final key =
+            DateTime.utc(parsedDate.year, parsedDate.month, parsedDate.day);
+        if (eventMap.containsKey(key)) {
+          eventMap[key]!.add(event);
+        } else {
+          eventMap[key] = [event];
+        }
+      }
+
+      setState(() {
+        _events.clear();
+        _events.addAll(eventMap);
+      });
+    } catch (e) {
+      print('Error fetching events: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to load events')),
+      );
+    }
   }
 
   Color _eventColor(String type) {
@@ -183,6 +204,12 @@ class _EventCalendarState extends State<EventCalendar> {
                 final events = _getEventsForDay(selectedDay);
                 _showEventsDialog(events);
               },
+
+              // ✅ Add this below onDaySelected
+              onPageChanged: (focusedDay) {
+                _focusedDay = focusedDay;
+                _fetchAndSetEvents(focusedDay.month, focusedDay.year);
+              },
             ),
             const SizedBox(height: 20),
             Expanded(
@@ -234,23 +261,16 @@ class _EventCalendarState extends State<EventCalendar> {
             return;
           }
 
-          final newEvent = await Navigator.push(
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => AddEventPage(selectedDate: _selectedDay!),
             ),
           );
 
-          if (newEvent != null && newEvent is Event) {
-            setState(() {
-              final key = DateTime.utc(
-                  _selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
-              if (_events[key] != null) {
-                _events[key]!.add(newEvent);
-              } else {
-                _events[key] = [newEvent];
-              }
-            });
+          // 🔄 Re-fetch events after returning from AddEventPage
+          if (result == true) {
+            _fetchAndSetEvents(_selectedDay!.month, _selectedDay!.year);
           }
         },
       ),

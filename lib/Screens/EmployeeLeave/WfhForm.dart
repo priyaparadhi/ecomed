@@ -1,5 +1,8 @@
 import 'package:ecomed/ApiCalls/ApiCalls.dart';
+import 'package:ecomed/Models/LeaveModel.dart';
+import 'package:ecomed/Models/WFHModel.dart';
 import 'package:ecomed/Screens/EmployeeLeave/LeaveTracker.dart';
+import 'package:ecomed/Screens/EmployeeLeave/WfHhistory.dart';
 import 'package:ecomed/Screens/EmployeeLeave/leavehistory.dart';
 import 'package:ecomed/styles/styles.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +20,7 @@ class _WorkFromHomeFormState extends State<WorkFromHomeForm> {
   DateTime _returnDate = DateTime.now();
   String _reason = '';
   bool _isSubmitting = false;
-  Future<List<LeaveHistory>>? futureLeaveHistory;
+
   Future<List<WfhHistory>>? futureWfhHistory;
 
   void initState() {
@@ -30,29 +33,12 @@ class _WorkFromHomeFormState extends State<WorkFromHomeForm> {
       // String employeeId = await _fetchAndStoreEmployeeId();
 
       setState(() {
-        // futureLeaveHistory = ApiCalls.fetchSingleEmployeeLeave();
         futureWfhHistory = ApiCalls.fetchSingleEmployeeWFH();
       });
     } catch (e) {
       print("Error: $e");
     }
   }
-
-  // Future<String> _fetchAndStoreEmployeeId() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   String? employeeId = prefs.getString('employee_id');
-
-  //   if (employeeId == null) {
-  //     await ApiCalls.fetchAndStoreEmployeeId();
-  //     employeeId = prefs.getString('employee_id');
-  //   }
-
-  //   if (employeeId == null) {
-  //     throw Exception('Employee ID not found after fetching and storing.');
-  //   }
-
-  //   return employeeId;
-  // }
 
   Future<void> _submitWorkFromHomeRequest() async {
     setState(() {
@@ -62,16 +48,10 @@ class _WorkFromHomeFormState extends State<WorkFromHomeForm> {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       int? employeeId = prefs.getInt('employee_id');
 
-      // if (employeeIdStr == null) {
-      //   throw Exception(
-      //       'Employee ID or User ID not found in SharedPreferences');
-      // }
-
-      //final int employeeId = int.parse(employeeIdStr);
       final noOfDays = _toDate.difference(_fromDate).inDays + 1;
 
       await ApiCalls.addWFH(
-        accountId: "1100",
+        accountId: "1",
         employeeId: employeeId ?? 0,
         noOfDays: noOfDays,
         reason: _reason,
@@ -387,8 +367,7 @@ class _WorkFromHomeFormState extends State<WorkFromHomeForm> {
               ),
             ],
           ),
-          LeaveHistorySection(
-            futureLeaveHistory: futureLeaveHistory ?? Future.value([]),
+          WfhHistorySection(
             futureWfhHistory: futureWfhHistory ?? Future.value([]),
           )
         ],

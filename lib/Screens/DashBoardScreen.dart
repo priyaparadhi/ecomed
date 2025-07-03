@@ -1,5 +1,6 @@
 import 'package:ecomed/Screens/Attendence/AttendenceHistory.dart';
 import 'package:ecomed/Screens/DailyPlan/EmployeesDailyPlans.dart';
+import 'package:ecomed/Screens/DailyPlan/completedUserPlan.dart';
 import 'package:ecomed/Screens/EmployeeLeave/LeaveRequest.dart';
 import 'package:ecomed/Screens/Tasks/Tasks/AddTaskPage.dart';
 import 'package:ecomed/Screens/Tasks/employessTasks.dart';
@@ -50,7 +51,7 @@ class HRDashboardScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => DailyPlanPageForAdmin()),
+                        builder: (context) => CompleteDailyPlan()),
                   );
                 }),
                 _dashboardCard(

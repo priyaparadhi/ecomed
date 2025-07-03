@@ -1,4 +1,6 @@
 import 'package:ecomed/ApiCalls/ApiCalls.dart';
+import 'package:ecomed/Models/LeaveModel.dart';
+import 'package:ecomed/Models/WFHModel.dart';
 import 'package:ecomed/Screens/EmployeeLeave/LeaveHistoryCard.dart';
 import 'package:ecomed/Screens/EmployeeLeave/LeaveTracker.dart';
 import 'package:ecomed/Screens/EmployeeLeave/WfhHistoryCard.dart';
@@ -7,16 +9,17 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 
 class LeaveHistorySection extends StatefulWidget {
-  Future<List<LeaveHistory>> futureLeaveHistory;
-  Future<List<WfhHistory>> futureWfhHistory;
+  Future<List<LeaveHistory>>? futureLeaveHistory;
+  Future<List<WfhHistory>>? futureWfhHistory;
 
-  LeaveHistorySection(
-      {required this.futureLeaveHistory, required this.futureWfhHistory});
+  LeaveHistorySection({this.futureLeaveHistory, this.futureWfhHistory});
   @override
   _LeaveHistorySectionState createState() => _LeaveHistorySectionState();
 }
 
 class _LeaveHistorySectionState extends State<LeaveHistorySection> {
+  late Future<List<LeaveHistory>> leaveHistoryFuture;
+  late Future<List<WfhHistory>> wfhHistoryFuture;
   @override
   void initState() {
     super.initState();
@@ -24,14 +27,15 @@ class _LeaveHistorySectionState extends State<LeaveHistorySection> {
   }
 
   void callFunction() async {
-    widget.futureLeaveHistory = ApiCalls.fetchSingleEmployeeLeave();
-    widget.futureWfhHistory = ApiCalls.fetchSingleEmployeeWFH();
+    leaveHistoryFuture =
+        widget.futureLeaveHistory ?? ApiCalls.fetchSingleEmployeeLeave();
+    // widget.futureWfhHistory ?? ApiCalls.fetchSingleEmployeeWFH();
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<dynamic>>(
-      future: Future.wait([widget.futureLeaveHistory, widget.futureWfhHistory]),
+      future: Future.wait([leaveHistoryFuture]),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -41,7 +45,7 @@ class _LeaveHistorySectionState extends State<LeaveHistorySection> {
         }
 
         List<LeaveHistory>? leaveHistory = snapshot.data![0];
-        List<WfhHistory>? wfhHistory = snapshot.data![1];
+        // List<WfhHistory>? wfhHistory = snapshot.data![1];
 
         leaveHistory?.sort((a, b) {
           DateTime dateA = DateTime.parse(a.dateFrom);
@@ -49,14 +53,16 @@ class _LeaveHistorySectionState extends State<LeaveHistorySection> {
           return dateB.compareTo(dateA);
         });
 
-        wfhHistory?.sort((a, b) {
-          DateTime dateA = DateTime.parse(a.dateFrom);
-          DateTime dateB = DateTime.parse(b.dateFrom);
-          return dateB.compareTo(dateA);
-        });
+        // wfhHistory?.sort((a, b) {
+        //   DateTime dateA = DateTime.parse(a.dateFrom);
+        //   DateTime dateB = DateTime.parse(b.dateFrom);
+        //   return dateB.compareTo(dateA);
+        // });
 
-        if ((leaveHistory == null || leaveHistory.isEmpty) &&
-            (wfhHistory == null || wfhHistory.isEmpty)) {
+        if ((leaveHistory == null || leaveHistory.isEmpty))
+        // &&
+        //     (wfhHistory == null || wfhHistory.isEmpty))
+        {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -87,8 +93,8 @@ class _LeaveHistorySectionState extends State<LeaveHistorySection> {
               ...leaveHistory
                   .map((leave) => LeaveHistoryCard(leave: leave))
                   .toList(),
-            if (wfhHistory != null && wfhHistory.isNotEmpty)
-              ...wfhHistory.map((wfh) => WfhHistoryCard(wfh: wfh)).toList(),
+            // if (wfhHistory != null && wfhHistory.isNotEmpty)
+            //   ...wfhHistory.map((wfh) => WfhHistoryCard(wfh: wfh)).toList(),
           ],
         );
       },
