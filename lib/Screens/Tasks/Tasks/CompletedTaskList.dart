@@ -7,14 +7,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class TaskListPage extends StatefulWidget {
-  const TaskListPage({Key? key}) : super(key: key);
+class CompletedTaskListPage extends StatefulWidget {
+  const CompletedTaskListPage({Key? key}) : super(key: key);
 
   @override
-  State<TaskListPage> createState() => _TaskListPageState();
+  State<CompletedTaskListPage> createState() => _TaskListPageState();
 }
 
-class _TaskListPageState extends State<TaskListPage> {
+class _TaskListPageState extends State<CompletedTaskListPage> {
   List<Task> _tasks = [];
   bool _isLoading = true;
   String? _error;
@@ -52,7 +52,7 @@ class _TaskListPageState extends State<TaskListPage> {
     });
 
     try {
-      final tasks = await ApiCalls.fetchMyTasks(null);
+      final tasks = await ApiCalls.fetchMyTasks(8);
       setState(() {
         _tasks = tasks;
         _isLoading = false;

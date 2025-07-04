@@ -68,7 +68,13 @@ class _TaskListPageState extends State<EmployeesTasksPage> {
     });
 
     try {
-      final tasks = await ApiCalls.fetchAllTasks();
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      final tasks = await ApiCalls.fetchAllTasks(
+        selectedUserId: _selectedUserId,
+        selectedTaskStatusId: _selectedTaskStatusId,
+      );
+
       setState(() {
         _tasks = tasks;
         _isLoading = false;
@@ -312,64 +318,119 @@ class _TaskListPageState extends State<EmployeesTasksPage> {
                         elevation: 2,
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: DropdownSearch<Map<String, dynamic>>(
-                            items: _assignedUsers,
-                            itemAsString: (user) =>
-                                "${user['first_name']} ${user['last_name']}",
-                            dropdownDecoratorProps: DropDownDecoratorProps(
-                              dropdownSearchDecoration: InputDecoration(
-                                labelText: "Filter by User",
-                                labelStyle: const TextStyle(
-                                    fontWeight: FontWeight.w500),
-                                filled: true,
-                                fillColor: Colors.grey.shade50,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
-                                ),
-                                prefixIcon: const Icon(Icons.filter_list),
-                                contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 12),
-                              ),
-                            ),
-                            popupProps: PopupProps.menu(
-                              showSearchBox: true,
-                              searchFieldProps: TextFieldProps(
-                                decoration: InputDecoration(
-                                  hintText: "Search User...",
-                                  prefixIcon: const Icon(Icons.search),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: DropdownSearch<Map<String, dynamic>>(
+                                  items: _assignedUsers,
+                                  itemAsString: (user) =>
+                                      "${user['first_name']} ${user['last_name']}",
+                                  dropdownDecoratorProps:
+                                      DropDownDecoratorProps(
+                                    dropdownSearchDecoration: InputDecoration(
+                                      labelText: "User",
+                                      filled: true,
+                                      fillColor: Colors.grey.shade50,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 12, vertical: 10),
+                                    ),
                                   ),
+                                  popupProps: PopupProps.menu(
+                                    showSearchBox: true,
+                                    searchFieldProps: TextFieldProps(
+                                      decoration: InputDecoration(
+                                        hintText: "Search User...",
+                                        prefixIcon: const Icon(Icons.search),
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  selectedItem: _selectedUserId != null
+                                      ? _assignedUsers.firstWhere(
+                                          (u) =>
+                                              u['user_id'] == _selectedUserId,
+                                          orElse: () => {},
+                                        )
+                                      : null,
+                                  onChanged: (user) {
+                                    setState(() {
+                                      _selectedUserId =
+                                          user?['user_id'] as int?;
+                                      _fetchTasks();
+                                    });
+                                  },
+                                  compareFn: (a, b) =>
+                                      a['user_id'] == b['user_id'],
                                 ),
                               ),
-                              itemBuilder: (context, user, isSelected) {
-                                return ListTile(
-                                  title: Text(
-                                    "${user['first_name']} ${user['last_name']}",
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: DropdownSearch<Map<String, dynamic>>(
+                                  items: _taskStatusList,
+                                  itemAsString: (status) =>
+                                      status['task_status'],
+                                  dropdownDecoratorProps:
+                                      DropDownDecoratorProps(
+                                    dropdownSearchDecoration: InputDecoration(
+                                      labelText: "Status",
+                                      filled: true,
+                                      fillColor: Colors.grey.shade50,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 12, vertical: 10),
+                                    ),
                                   ),
-                                  leading: const Icon(Icons.person),
-                                  selected: isSelected,
-                                );
-                              },
-                            ),
-                            selectedItem: _selectedUserId != null
-                                ? _assignedUsers.firstWhere(
-                                    (u) => u['user_id'] == _selectedUserId,
-                                    orElse: () => {},
-                                  )
-                                : null,
-                            onChanged: (user) {
-                              setState(() {
-                                _selectedUserId = user?['user_id'] as int?;
-                                // You can trigger a filter function here too.
-                              });
-                            },
-                            compareFn: (a, b) => a['user_id'] == b['user_id'],
+                                  popupProps: PopupProps.menu(
+                                    showSearchBox: true,
+                                    searchFieldProps: TextFieldProps(
+                                      decoration: InputDecoration(
+                                        hintText: "Search Status...",
+                                        prefixIcon: const Icon(Icons.search),
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  selectedItem: _selectedTaskStatusId != null
+                                      ? _taskStatusList.firstWhere(
+                                          (s) =>
+                                              s['task_status_id'] ==
+                                              _selectedTaskStatusId,
+                                          orElse: () => {},
+                                        )
+                                      : null,
+                                  onChanged: (status) {
+                                    setState(() {
+                                      _selectedTaskStatusId =
+                                          status?['task_status_id'] as int?;
+                                      _fetchTasks();
+                                    });
+                                  },
+                                  compareFn: (a, b) =>
+                                      a['task_status_id'] ==
+                                      b['task_status_id'],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
                     ),
+
                     // Tasks list
                     Expanded(
                       child: _tasks.isEmpty

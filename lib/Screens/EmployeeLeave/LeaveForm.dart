@@ -102,25 +102,34 @@ class _LeaveFormState extends State<LeaveForm> {
         "attachment": _filePath != null ? _filePath : null
       };
 
-      print(
-          "here is the data of the submit >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>$data");
-
       var response = await ApiCalls.applyLeave(data);
 
       final message =
           response['message'] ?? 'Leave request submitted successfully.';
       final warning = response['warning'];
 
-      String finalMessage = warning != null && warning.toString().isNotEmpty
-          ? '$message\n⚠️ $warning'
-          : message;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(finalMessage),
-          backgroundColor: Colors.green,
-        ),
-      );
+      if (warning != null && warning.toString().isNotEmpty) {
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Warning'),
+            content: Text('$message\n\n⚠️ $warning'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('OK'),
+              ),
+            ],
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
 
       setState(() {
         _selectedLeaveType;
@@ -130,6 +139,7 @@ class _LeaveFormState extends State<LeaveForm> {
         _reason = '';
         _filePath = null;
       });
+
       widget.refresh();
       Navigator.pop(context);
     } catch (e) {

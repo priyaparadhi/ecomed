@@ -4,6 +4,7 @@ import 'package:ecomed/Screens/Attendence/MyAttendence.dart';
 import 'package:ecomed/Screens/DailyPlan/CompletedMyPlans.dart';
 import 'package:ecomed/Screens/DailyPlan/DailyPlanList.dart';
 import 'package:ecomed/Screens/EmployeeLeave/LeaveTracker.dart';
+import 'package:ecomed/Screens/Tasks/Tasks/CompletedTaskList.dart';
 import 'package:ecomed/Screens/Tasks/Tasks/TaskList.dart';
 import 'package:ecomed/styles/DrawerWidget.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +31,9 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
   final Color primaryColor = Colors.blue.shade800;
   final Color secondaryColor = Colors.blue.shade300;
   final Color backgroundColor = const Color(0xFFF8F9FA);
+  String firstName = '';
+  String lastName = '';
+
   final StopWatchTimer _stopWatchTimer = StopWatchTimer(
     mode: StopWatchMode.countUp,
     onChange: (value) {
@@ -51,6 +55,13 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
   bool _isCheckingIn = true;
   bool isLoading = false;
   bool _isCheckingLocation = false;
+  Future<void> loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      firstName = prefs.getString('first_name') ?? '';
+      lastName = prefs.getString('last_name') ?? '';
+    });
+  }
 
   Future<Position> _determinePosition() async {
     setState(() {
@@ -232,7 +243,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
   @override
   void initState() {
     fetchAttendanceData();
-
+    loadUserData();
     //getPunched();
 
     //_determinePosition();
@@ -623,13 +634,14 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Welcome back, Priya 👋',
-              style: GoogleFonts.poppins(
+              'Welcome back, $firstName 👋',
+              style: GoogleFonts.lato(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
                 color: Colors.black87,
               ),
             ),
+
             const SizedBox(height: 24),
 
             // Overview Cards
@@ -644,7 +656,13 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                     title: 'Completed Tasks',
                     count: 12,
                     icon: LucideIcons.checkCircle2,
-                    color: Colors.green),
+                    color: Colors.green,
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CompletedTaskListPage()));
+                    }),
                 UserStatCard(
                     title: 'Pending Tasks',
                     count: 8,
@@ -692,7 +710,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                 UserStatCard(
                     title: 'Leaves',
                     count: 2,
-                    icon: LucideIcons.leaf,
+                    icon: LucideIcons.calendar,
                     color: Colors.deepPurple,
                     onTap: () {
                       Navigator.push(

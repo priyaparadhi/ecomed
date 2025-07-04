@@ -869,13 +869,50 @@ class ApiCalls {
     }
   }
 
-  static Future<List<Task>> fetchAllTasks() async {
+  static Future<List<Task>> fetchAllTasks({
+    int? selectedUserId,
+    int? selectedTaskStatusId,
+  }) async {
+    final url = Uri.parse('${baseurl}fetch_all_tasks');
+
+    final Map<String, dynamic> requestBody = {
+      if (selectedUserId != null) "user_id": selectedUserId,
+      if (selectedTaskStatusId != null) "task_status_id": selectedTaskStatusId,
+    };
+
+    print('📤 Request URL: $url');
+    print('📤 Request Body: ${jsonEncode(requestBody)}');
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(requestBody),
+    );
+
+    print('📥 Response Status Code: ${response.statusCode}');
+    print('📥 Response Body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      if (jsonResponse['success'] == true) {
+        final List tasksJson = jsonResponse['data'];
+        return tasksJson.map((e) => Task.fromJson(e)).toList();
+      } else {
+        throw Exception('Error fetching tasks.');
+      }
+    } else {
+      throw Exception('Failed to load tasks.');
+    }
+  }
+
+  static Future<List<Task>> fetchMyTasks(int? selectedTaskStatusId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final url = Uri.parse('${baseurl}fetch_all_tasks');
 
     final int? userId = prefs.getInt("user_id");
     final Map<String, dynamic> requestBody = {
-      "user_id": userId // Send as int, not string
+      "user_id": userId, // Send as int, not string
+      if (selectedTaskStatusId != null) "task_status_id": selectedTaskStatusId,
     };
 
     print('📤 Request URL: $url');

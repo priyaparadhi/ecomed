@@ -125,7 +125,7 @@ class _ExpenseClaimPageState extends State<ExpenseClaimPage> {
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
         title: Text("Expense Claim"),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.white,
         actions: [
           IconButton(
             icon: Icon(Icons.refresh),
@@ -166,7 +166,8 @@ class _ExpenseClaimPageState extends State<ExpenseClaimPage> {
                 icon: Icon(Icons.attach_file),
                 label: Text("Choose File"),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple.shade200,
+                  backgroundColor: Colors.blueAccent.shade200,
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -188,7 +189,8 @@ class _ExpenseClaimPageState extends State<ExpenseClaimPage> {
                 icon: Icon(Icons.calculate),
                 label: Text("Calculate Fare"),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.blueAccent,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
@@ -233,7 +235,8 @@ class _ExpenseClaimPageState extends State<ExpenseClaimPage> {
                 child: Text("Submit", style: TextStyle(fontSize: 16)),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.blueAccent,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
               ),
@@ -246,6 +249,7 @@ class _ExpenseClaimPageState extends State<ExpenseClaimPage> {
 
   Widget _cardSection({required String title, required List<Widget> children}) {
     return Card(
+      color: Colors.white,
       elevation: 4,
       margin: EdgeInsets.only(bottom: 20),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
