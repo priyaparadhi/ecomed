@@ -1,5 +1,6 @@
 import 'package:ecomed/ApiCalls/ApiCalls.dart';
 import 'package:ecomed/Models/EnquiryModel.dart';
+import 'package:ecomed/Screens/Enquiry/AddEnquiry.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -285,6 +286,16 @@ class _EnquiryPageState extends State<EnquiryPage> {
                     ),
                   ],
                 ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.add),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AddEnquiryForm()),
+          );
+        },
+      ),
     );
   }
 }

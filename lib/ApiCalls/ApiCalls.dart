@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:ecomed/Models/AttendenceModel.dart';
 import 'package:ecomed/Models/CompaniesModel.dart';
 import 'package:ecomed/Models/ContactModel.dart';
 import 'package:ecomed/Models/DailyPlanModel.dart';
+import 'package:ecomed/Models/DropdownsModel.dart';
 import 'package:ecomed/Models/EnquiryModel.dart';
 import 'package:ecomed/Models/EventModel.dart';
 import 'package:ecomed/Models/LeaveModel.dart';
@@ -14,11 +16,13 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
 
 class ApiCalls {
   //static String baseurl = "https://portalwiz.net/laravelapi/public/api/";
   static String basestorage = "https://portalwiz.net/laravelapi/storage/app/";
-  static String baseurl = "https://ecomed-dev.portalwiz.in/api/public/api/";
+  static String baseurl = "https://ecomed-test.portalwiz.in/api/public/api/";
   //baseurl = https://portalwiz.net/laravelapi/public/api/
   //basestorage = https://portalwiz.net/laravelapi/storage/app/
   // devurl = https://pw-bms-dev.portalwiz.in
@@ -1215,10 +1219,10 @@ class ApiCalls {
     print('Headers: ${{'Content-Type': 'application/json'}}');
     print('Body: $requestBody');
 
-    final response = await http.post(
+    final response = await http.get(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: requestBody,
+      // body: requestBody,
     );
 
     print('📥 RESPONSE ←');
@@ -1423,6 +1427,114 @@ class ApiCalls {
       }
     } else {
       throw Exception('Server error ${response.statusCode}');
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> fetchCustomerDesignations() async {
+    try {
+      final response = await http.get(Uri.parse('${baseurl}cust_designation'));
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        if (jsonResponse['success'] == true) {
+          return List<Map<String, dynamic>>.from(jsonResponse['data']);
+        }
+      }
+    } catch (e) {
+      print('Error fetching designations: $e');
+    }
+    return [];
+  }
+
+  static Future<EnquiryDropdownModel> fetchEnquiryDropdownData() async {
+    final url = Uri.parse("${baseurl}enquiry_dropdown/1");
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      return EnquiryDropdownModel.fromJson(jsonResponse);
+    } else {
+      throw Exception('Failed to load enquiry dropdown data');
+    }
+  }
+
+  static Future<Map<String, dynamic>> submitEnquiryForm({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String mobNo,
+    required String companyName,
+    required String companyEmail,
+    required String companyMobNo,
+    required String categoryEnqId,
+    required String sourceEnqId,
+    required String enquiryLevelId,
+    required String purchaseTimeline,
+    required String preferredMeetingDate,
+    required String note,
+    required String preferredContactMethod,
+    File? attachmentFile,
+  }) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int? createdBy = prefs.getInt("user_id");
+    final int? accountId = prefs.getInt("account_id");
+    final url = Uri.parse("${baseurl}add_enquiry");
+
+    final request = http.MultipartRequest('POST', url);
+
+    request.fields.addAll({
+      'user_id': createdBy.toString(),
+      'created_by': createdBy.toString(),
+      'first_name': firstName,
+      'last_name': lastName,
+      'email': email,
+      'mob_no': mobNo,
+      'company_name': companyName,
+      'company_email': companyEmail,
+      'company_mob_no': companyMobNo,
+      'category_enq_id': categoryEnqId,
+      'source_enq_id': sourceEnqId,
+      'enquiry_level_id': enquiryLevelId,
+      'purchase_timeline': purchaseTimeline,
+      'preferred_meeting_date': preferredMeetingDate,
+      'note': note,
+      'preferred_contact_method': preferredContactMethod,
+      'account_id': accountId.toString(),
+    });
+
+    // Log fields for debugging
+    print("=== Enquiry Form Request Fields ===");
+    request.fields.forEach((key, value) {
+      print("$key: $value");
+    });
+
+    // Log attachment file name if exists
+    if (attachmentFile != null) {
+      final mimeTypeData = lookupMimeType(attachmentFile.path)?.split('/') ??
+          ['application', 'octet-stream'];
+      request.files.add(await http.MultipartFile.fromPath(
+        'enq_attachment',
+        attachmentFile.path,
+        contentType: MediaType(mimeTypeData[0], mimeTypeData[1]),
+      ));
+
+      print("Attached file: ${attachmentFile.path.split('/').last}");
+    } else {
+      print("No file attached");
+    }
+
+    // Send the request
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+
+    print("=== Enquiry Form API Response ===");
+    print("Status Code: ${response.statusCode}");
+    print("Response Body: ${response.body}");
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to submit enquiry: ${response.body}");
     }
   }
 }

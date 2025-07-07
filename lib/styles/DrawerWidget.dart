@@ -473,21 +473,19 @@ class _DrawerWidgetState extends State<DrawerWidget> {
           //     ),
           //   ),
           // ),
-          Visibility(
-            visible: roleId == 1,
-            child: ListTile(
-              title: const Text("Event Calender "),
-              leading: const Icon(
-                Icons.work,
-                color: Colors.teal,
-              ),
-              onTap: () {
-                Navigator.pop(context);
 
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => EventCalendar()));
-              },
+          ListTile(
+            title: const Text("Event Calender "),
+            leading: const Icon(
+              Icons.work,
+              color: Colors.teal,
             ),
+            onTap: () {
+              Navigator.pop(context);
+
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => EventCalendar()));
+            },
           ),
 
           Visibility(

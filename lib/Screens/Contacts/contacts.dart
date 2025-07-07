@@ -1,5 +1,6 @@
 import 'package:ecomed/ApiCalls/ApiCalls.dart';
 import 'package:ecomed/Models/ContactModel.dart';
+import 'package:ecomed/Screens/Contacts/AddContacts.dart';
 import 'package:flutter/material.dart';
 
 class ContactPage extends StatefulWidget {
@@ -210,6 +211,16 @@ class _ContactPageState extends State<ContactPage> {
                           ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.add),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddContactForm()),
+          );
+        },
       ),
     );
   }
